@@ -14,5 +14,6 @@ import lombok.experimental.FieldDefaults;
 public class ApiResponse <T> {
     int code =200;
     String message;
+//    Object messgae;
     T data;
 }

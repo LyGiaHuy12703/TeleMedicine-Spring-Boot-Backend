@@ -24,7 +24,7 @@ public class Patients {
     String fullName;
     String email;
     String password;
-    String verifyCode;
+    boolean verified = false;
 
     Set<String> roles = new HashSet<>();
 
@@ -40,4 +40,6 @@ public class Patients {
     @OneToOne(mappedBy = "patients", cascade = CascadeType.ALL)
     MedicalRecordBook medicalRecordBook;
 
+    @OneToOne(mappedBy = "patients", cascade = CascadeType.ALL)
+    Token token;
 }

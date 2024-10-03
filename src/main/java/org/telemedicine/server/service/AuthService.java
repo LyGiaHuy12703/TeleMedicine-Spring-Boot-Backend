@@ -4,12 +4,14 @@ import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.SignedJWT;
+import jakarta.mail.MessagingException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -50,7 +52,10 @@ public class AuthService {
     PasswordEncoder passwordEncoder;
     MedicalStaffRepository medicalStaffRepository;
 
+    MailService mailService;
+
     TokenRepository tokenRepository;
+    private final org.telemedicine.server.utils.helper helper;
 
     @NonFinal
     @Value("${jwt.accessToken}")
@@ -61,15 +66,14 @@ public class AuthService {
     @NonFinal
     @Value("${jwt.refreshable-duration}")
     protected long REFRESHABLE_DURATION;
-
-    public PatientResponse signUp(PatientCreationRequest request){
+    // dang ky cho user
+    public PatientResponse signUp(PatientCreationRequest request) throws MessagingException {
         //tim email tồn tại không cho đăng ký
         if(patientRepository.existsByEmail(request.getEmail()))
             throw new AppException(ErrorCode.USER_EXISTED);
 
         Patients patient = patientMapper.toPatient(request);
 
-//        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         patient.setPassword(passwordEncoder.encode(request.getPassword()));
 
         HashSet<String> roles = new HashSet<>();
@@ -78,18 +82,79 @@ public class AuthService {
 
         patient.setRoles(roles);
 
-        return patientMapper.toPatientResponse(patientRepository.save(patient));
+        patientRepository.save(patient);
+
+//        String random = helper.generateTempPwd(6);
+        //tạo token xác thực
+        String verifyToken = helper.generateTempPwd(32);
+
+        Token token = new Token();
+        token.setToken(verifyToken);
+        token.setPatients(patient);
+        tokenRepository.save(token);
+
+        //gửi mail xác nhận
+        String confirmationUrl = "http://localhost:8080/api/auth/verify/" + verifyToken;
+        String message = "<p>Xin chào,</p>"
+                + "<p>Vui lòng nhấn vào liên kết dưới đây để xác thực địa chỉ email của bạn:</p>"
+                + "<p><a href=\"" + confirmationUrl + "\">Xác thực tài khoản</a></p>";
+        mailService.sendVerificationMail(patient.getEmail(), message);
+
+        return patientMapper.toPatientResponse(patient);
+    }
+    //verify email user
+    public boolean verifyUser(String token) {
+        Token verificationToken = tokenRepository.findByToken(token);
+
+        if (verificationToken == null) {
+            return false;
+        }
+
+        Patients patients = verificationToken.getPatients();
+        patients.setVerified(true);
+        patientRepository.save(patients);
+        tokenRepository.delete(verificationToken); // Xóa token sau khi xác nhận
+
+        return true;
+    }
+    //changePassword
+    public void changePassword(PasswordChangeRequest request){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        Patients patients = patientRepository.findByEmail(email).orElse(null);
+
+        if(patients == null){
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        }
+
+        boolean verified = passwordEncoder.matches(request.getPassword(), patients.getPassword());
+
+        if(!verified){
+            throw new AppException(ErrorCode.PASSWORD_WRONG);
+        }
+        patients.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        patientRepository.save(patients);
+    }
+    //forgot password
+    public void forgotPassword(ForgotPasswordRequest request){
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Patients patients = patientRepository.findByEmail(email).orElse(null);
+        if(patients == null){
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        }
+
+
     }
 
     //authentication user
     public AuthResponse authenticateUser(AuthRequest request){
-        var patient = patientRepository.findByEmail(request.getEmail())
+        Patients patient = patientRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(request.getPassword(), patient.getPassword());
 
-        if(!authenticated){
+        if(!authenticated || !patient.isVerified()){
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
@@ -131,6 +196,7 @@ public class AuthService {
                         Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()//token hết hạn sau 1h
                 ))
                 .jwtID(UUID.randomUUID().toString())
+                .claim("name", patients.getFullName())
                 .claim("scope", buildScopeUser(patients))
                 .build();
 

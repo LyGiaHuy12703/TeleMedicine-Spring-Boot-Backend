@@ -1,20 +1,25 @@
 package org.telemedicine.server.controller;
 
 import com.nimbusds.jose.JOSEException;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.telemedicine.server.dto.request.*;
 import org.telemedicine.server.dto.response.AuthResponse;
 import org.telemedicine.server.dto.response.IntrospectResponse;
 import org.telemedicine.server.dto.response.PatientResponse;
-import org.telemedicine.server.entity.Patients;
 import org.telemedicine.server.service.AuthService;
 import org.telemedicine.server.service.PatientService;
 
+import java.net.URI;
 import java.text.ParseException;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/auth")
 public class AuthController {
     @Autowired
@@ -25,10 +30,34 @@ public class AuthController {
 
     //Đăng ký cho user
     @PostMapping("/signup")
-    ApiResponse<PatientResponse> signup(@RequestBody @Valid PatientCreationRequest request) {
+    ApiResponse<PatientResponse> signup(@RequestBody @Valid PatientCreationRequest request) throws MessagingException {
         ApiResponse<PatientResponse> apiResponse = new ApiResponse<>();
         apiResponse.setData(authService.signUp(request));
+        apiResponse.setMessage("Đăng ký tài khoản thành công, vui lòng xác nhận email");
         return apiResponse;
+    }
+    //xac nhan email user
+    @GetMapping("/verify/{token}")
+    ResponseEntity<Void> verifyUser(@PathVariable("token") String token) {
+        boolean verified = authService.verifyUser(token);
+
+        if (verified) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setLocation(URI.create("http://localhost:3000/auth/verification-success"));
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+//            return ApiResponse.builder()
+//                    .code(200)
+//                    .message("Xác nhận tài khoản thành công! Bạn có thể đăng nhập.")
+//                    .build();
+        } else {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setLocation(URI.create("http://localhost:3000/auth/verification-failed"));
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+//            return ApiResponse.builder()
+//                    .code(200)
+//                    .message("Token không hợp lệ hoặc đã hết hạn.")
+//                    .build();
+        }
     }
     //đăng nhập cho user
     @PostMapping("/signinUser")
@@ -71,6 +100,23 @@ public class AuthController {
         authService.logout(request);
         return ApiResponse.<Void>builder()
                 .code(200)
+                .build();
+    }
+    @PostMapping("/changePassword")
+    ApiResponse<Object> changePassword(@RequestBody PasswordChangeRequest request) {
+        authService.changePassword(request);
+        return ApiResponse.builder()
+                .code(200)
+                .message("Đổi mật khẩu thành công")
+                .build();
+    }
+
+    @PostMapping("/forgotPassword")
+    ApiResponse<Object> forgotPassword(@RequestBody ForgotPasswordRequest request){
+        authService.forgotPassword(request);
+        return ApiResponse.builder()
+                .code(200)
+                .message("Đổi mật khẩu thành công")
                 .build();
     }
 

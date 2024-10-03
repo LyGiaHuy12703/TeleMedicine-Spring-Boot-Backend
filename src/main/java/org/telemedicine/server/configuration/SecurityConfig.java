@@ -1,6 +1,5 @@
 package org.telemedicine.server.configuration;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -11,13 +10,13 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
-import org.telemedicine.server.enums.Role;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 
 import javax.crypto.spec.SecretKeySpec;
 
@@ -44,8 +43,7 @@ public class SecurityConfig {
         //cấu hình những đường dẫn guest có thể đi vào
         httpSecurity.authorizeHttpRequests(request ->
                 request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
-//                            .requestMatchers(HttpMethod.GET, "/users")
-//                            .hasRole(Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.GET, "auth/verify/**").permitAll()
                         .anyRequest().authenticated());
 
         httpSecurity.oauth2ResourceServer(oauth2 ->
@@ -57,8 +55,27 @@ public class SecurityConfig {
 
         //chống tấn công nhưng trường hợp này có thể tắt csrf
         httpSecurity.csrf(AbstractHttpConfigurer::disable);
+        httpSecurity.cors(Customizer.withDefaults());
+
         return httpSecurity.build();
     }
+
+    //cấu hình cho front end gọi
+    @Bean
+    public CorsFilter corsFilter() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+
+        corsConfiguration.addAllowedOrigin("http://localhost:3000");  // Cho phép frontend truy cập từ localhost:3000
+        corsConfiguration.addAllowedMethod("*");  // Cho phép tất cả các phương thức: GET, POST, PUT, DELETE, etc.
+        corsConfiguration.addAllowedHeader("*");  // Cho phép tất cả các header
+        corsConfiguration.setAllowCredentials(true);  // Cho phép gửi thông tin xác thực như cookies, authorization headers
+
+        UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
+        urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);  // Áp dụng cho tất cả các endpoint
+
+        return new CorsFilter(urlBasedCorsConfigurationSource);
+    }
+
 
     @Bean
     JwtAuthenticationConverter jwtConverter() {

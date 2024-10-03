@@ -20,4 +20,5 @@ public class PatientCreationRequest {
     @Size(min = 6, message = "PASSWORD_INVALID")
     String password;
     String verifyCode;
+    boolean verified=false;
 }
