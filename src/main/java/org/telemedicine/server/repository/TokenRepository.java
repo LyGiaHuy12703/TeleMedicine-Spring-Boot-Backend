@@ -7,4 +7,7 @@ import org.telemedicine.server.entity.Token;
 @Repository
 public interface TokenRepository extends JpaRepository<Token, String> {
     Token findByToken(String token);
+    Token findByRefreshToken(String refreshToken);
+    Token findByPatientsId(String userId);
+    void deleteByPatientsId(String userId);
 }

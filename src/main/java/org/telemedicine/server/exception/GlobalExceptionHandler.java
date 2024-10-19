@@ -1,59 +1,74 @@
 package org.telemedicine.server.exception;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.telemedicine.server.dto.request.ApiResponse;
+import org.telemedicine.server.dto.api.ApiResponse;
+
+import javax.naming.AuthenticationException;
+import java.nio.file.AccessDeniedException;
+import java.util.stream.Collectors;
 
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(value =Exception.class) //tên lớp muốn bắt
-    ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException e) {
-        ApiResponse apiResponse = new ApiResponse();
 
-        apiResponse.setCode(ErrorCode.UNCATEGORIZED.getCode());
-        apiResponse.setMessage(ErrorCode.UNCATEGORIZED.getMessage());
 
-        return ResponseEntity.badRequest().body(apiResponse);
+    @ExceptionHandler(value = AppException.class)
+    ResponseEntity<ApiResponse<Void>> handlingAppException(AppException e) {
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
+                .success(false)
+                .message(e.getMessage())
+                .code(e.getCode())
+                .build();
+        return ResponseEntity.status(e.getStatus()).body(response);
     }
 
-    @ExceptionHandler(value = AppException.class) //tên lớp muốn bắt
-    ResponseEntity<ApiResponse> handlingRuntimeException(AppException e) {
-        ErrorCode errorCode = e.getErrorCode();
-        ApiResponse apiResponse = new ApiResponse();
-
-        apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMessage(errorCode.getMessage());
-
-        return ResponseEntity
-                .status(errorCode.getStatusCodes())
-                .body(apiResponse);
-    }
-
-    @ExceptionHandler(value = AccessDeniedException.class)
-    ResponseEntity<ApiResponse> handlingAccessDeniedException(AccessDeniedException e) {
-        ErrorCode errorCode = ErrorCode.UNAUTHORIRED;
-
-        return ResponseEntity.status(errorCode.getStatusCodes()).body(
-                ApiResponse.builder()
-                        .code(errorCode.getCode())
-                        .message(errorCode.getMessage())
-                        .build()
-        );
-    }
-//  validation
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    ResponseEntity<ApiResponse> handlingMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        String enumKey = e.getFieldError().getDefaultMessage();
-        ErrorCode errorCode = ErrorCode.valueOf(enumKey);
+    ResponseEntity<ApiResponse<Void>> handlingMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        String errorMessage = e.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(fieldError -> fieldError.getField().toUpperCase() + ": " + fieldError.getDefaultMessage())
+                .collect(Collectors.joining(", "));
 
-        ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMessage(errorCode.getMessage());
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
+                .success(false)
+                .message(errorMessage)
+                .code("global-e-01")
+                .build();
 
-        return ResponseEntity.badRequest().body(apiResponse);
+        return ResponseEntity.status(400).body(response);
+    }
+
+    @ExceptionHandler(value = AuthenticationException.class)
+    ResponseEntity<ApiResponse<Void>> handlingAuthenticationException(AuthenticationException e) {
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
+                .success(false)
+                .code("auth-e-01")
+                .message("Authentication failed: " + e.getMessage())
+                .build();
+        return ResponseEntity.status(401).body(response); // 401 Unauthorized
+    }
+
+    @ExceptionHandler(value = java.nio.file.AccessDeniedException.class)
+    ResponseEntity<ApiResponse<Void>> handlingAccessDeniedException(AccessDeniedException e) {
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
+                .success(false)
+                .code("auth-e-02")
+                .message("Không có quyền truy cập: " + e.getMessage())
+                .build();
+        return ResponseEntity.status(403).body(response); // 403 Forbidden
+    }
+
+    @ExceptionHandler(value = Exception.class)
+    ResponseEntity<ApiResponse<Void>> handlingException(Exception e) {
+        ApiResponse<Void> response = ApiResponse.<Void>builder()
+                .success(false)
+                .code("global-e-01")
+                .message(e.getMessage())
+                .build();
+        return ResponseEntity.badRequest().body(response);
     }
 }

@@ -16,8 +16,11 @@ public class Token {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
+    @Column(length = 500)
     String token;
-    Date expiryTime;
+    @Column(length = 500)
+    String refreshToken;
+    Date createAt;
     @OneToOne(targetEntity = Patients.class, fetch = FetchType.EAGER)
     @JoinColumn( name = "patient_id")
     private Patients patients;

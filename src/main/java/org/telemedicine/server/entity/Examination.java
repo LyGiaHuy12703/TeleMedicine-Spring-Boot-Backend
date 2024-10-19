@@ -1,5 +1,7 @@
 package org.telemedicine.server.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -22,17 +24,21 @@ public class Examination {
 
     @ManyToOne
     @JoinColumn(name = "service_id")
-    Service service;
+    @JsonBackReference
+    ServiceEntity serviceEntity;
 
     @ManyToOne
     @JoinColumn(name = "clinic_id")
+    @JsonBackReference
     Clinic clinic;
 
     @ManyToOne
     @JoinColumn(name = "patient_id")
+    @JsonBackReference
     Patients patients;
 
     @OneToMany(mappedBy = "examination", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     List<Prescription> prescriptions = new ArrayList<>();
 
 }

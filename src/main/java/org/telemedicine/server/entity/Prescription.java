@@ -1,5 +1,7 @@
 package org.telemedicine.server.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -24,8 +26,10 @@ public class Prescription {
 
     @ManyToOne
     @JoinColumn(name = "prescription_id")
+    @JsonBackReference
     Examination examination;
 
     @OneToMany(mappedBy = "prescription", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     List<PrescriptionMedicine> prescriptionMedicines;
 }

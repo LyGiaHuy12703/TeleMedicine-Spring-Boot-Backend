@@ -1,18 +1,28 @@
 package org.telemedicine.server.exception;
 
-public class AppException extends RuntimeException{
-    public AppException(ErrorCode errorCode) {
-        super(errorCode.getMessage());
-        this.errorCode = errorCode;
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+@Getter
+public class AppException extends RuntimeException {
+    private final HttpStatus status;
+    private final String code;
+
+    public AppException(HttpStatus status, String message, String code) {
+        super(message);
+        this.status = status;
+        this.code = code;
     }
 
-    private ErrorCode errorCode;
-
-    public ErrorCode getErrorCode() {
-        return errorCode;
+    public AppException(HttpStatus status, String message) {
+        super(message);
+        this.status = status;
+        this.code = null;
     }
 
-    public void setErrorCode(ErrorCode errorCode) {
-        this.errorCode = errorCode;
+    public AppException(String message) {
+        super(message);
+        this.status = HttpStatus.INTERNAL_SERVER_ERROR;
+        this.code = null;
     }
 }

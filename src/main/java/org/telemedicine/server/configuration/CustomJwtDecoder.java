@@ -14,7 +14,7 @@ import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Component;
 
-import org.telemedicine.server.dto.request.IntrospectRequest;
+import org.telemedicine.server.dto.auth.IntrospectRequest;
 import org.telemedicine.server.service.AuthService;
 import com.nimbusds.jose.JOSEException;
 

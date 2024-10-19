@@ -31,6 +31,7 @@ public class ApplicationInitConfig {
 
                 MedicalStaff admin = new MedicalStaff();
                 admin.setRoles(roles);
+                admin.setFullName("Admin");
                 admin.setEmail("admin@email.com");
                 admin.setPassword(passwordEncoder.encode("admin"));
                 medicalStaffRepository.save(admin);

@@ -12,6 +12,12 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+  #    open-in-view: false  # Hạn chế vấn đề với session Hibernate ngoài phạm vi giao dịch
   mvc:
     cors:
       allowed-origins: "http://localhost:3000"
@@ -40,12 +46,17 @@ mailServer:
   password: r j m t z o k f h o v x s h y d
   protocol: smtp
   isSSL: false
+cloudinary:
+  cloud-name: dkcn9vpuy
+  api-key: 136272232281289
+  secret-key: OB7tNZdLb222OCnGCbcz2-nkess
+
+
 
 
 
 jwt:
   accessToken: "oGuan+rlGCKCbL7pNKWTXd105C0QN0EOxs4zntzEPtCg3ZQPq9ivt1dm9COrDXPY"
-#  thời gian hết hạn token theo đơn vị giây
-  valid-duration: 3600
-#  thời gian có thể refresh token
-  refreshable-duration: 36000
+  expiryTime: 3600 #Thời gian hết hạn của token theo giây
+  refreshToken: "TmaYX9O/HJjGlI7CKMLGnYv8lFfAkaaRW6mb90AWRNYAUyz4sEI0cUSfVTLrromU"
+  expiryTimeRefreshToken: 36000 #Thời gian hết hạn refresh

@@ -1,5 +1,6 @@
 package org.telemedicine.server.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -21,8 +22,10 @@ public class Clinic {
     String status;
 
     @OneToMany(mappedBy = "clinic", cascade = CascadeType.ALL,orphanRemoval = true)
+    @JsonManagedReference
     List<Examination> examinations;
 
     @OneToMany(mappedBy = "clinic", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     List<RoomSchedule> roomSchedules;
 }

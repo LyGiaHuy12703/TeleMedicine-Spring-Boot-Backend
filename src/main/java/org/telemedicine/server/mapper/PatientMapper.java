@@ -2,9 +2,9 @@ package org.telemedicine.server.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
-import org.telemedicine.server.dto.request.PatientCreationRequest;
-import org.telemedicine.server.dto.request.PatientUpdateRequest;
-import org.telemedicine.server.dto.response.PatientResponse;
+import org.telemedicine.server.dto.patients.PatientCreationRequest;
+import org.telemedicine.server.dto.patients.PatientResponse;
+import org.telemedicine.server.dto.patients.PatientUpdateRequest;
 import org.telemedicine.server.entity.Patients;
 
 import java.util.List;

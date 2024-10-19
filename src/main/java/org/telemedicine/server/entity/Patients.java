@@ -1,5 +1,7 @@
 package org.telemedicine.server.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -29,12 +31,15 @@ public class Patients {
     Set<String> roles = new HashSet<>();
 
     @OneToMany(mappedBy = "patients", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     List<MedicalSchedule> medicalSchedule;
 
     @OneToMany(mappedBy = "patients", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     List<Registration> registration;
 
     @OneToMany(mappedBy = "patients", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     List<Examination> examination;
 
     @OneToOne(mappedBy = "patients", cascade = CascadeType.ALL)
