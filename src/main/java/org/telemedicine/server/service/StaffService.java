@@ -61,7 +61,7 @@ public class StaffService {
                 .address(request.getAddress())
                 .dob(request.getDob())
                 .phone(request.getPhone())
-                .department(request.getDepartment())
+//                .department(request.getDepartment())
                 .gender(request.isGender())
                 .startDate(request.getStartDate())
                 .practicingCertificate(request.getPracticingCertificate())

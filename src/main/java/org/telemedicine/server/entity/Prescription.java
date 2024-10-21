@@ -3,6 +3,7 @@ package org.telemedicine.server.entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -20,6 +21,7 @@ public class Prescription {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
+    @NotBlank(message = "Benh is required")
     String benh;
 
     @ManyToOne
@@ -29,5 +31,5 @@ public class Prescription {
 
     @OneToMany(mappedBy = "prescription", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    List<PrescriptionMedicine> prescriptionMedicines;
+    List<PrescriptionMedicine> prescriptionMedicines = new ArrayList<>();
 }

@@ -10,8 +10,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.telemedicine.server.entity.MedicalStaff;
 import org.telemedicine.server.enums.Role;
+import org.telemedicine.server.enums.Status;
 import org.telemedicine.server.repository.MedicalStaffRepository;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 
 @Configuration
@@ -33,6 +35,12 @@ public class ApplicationInitConfig {
                 admin.setRoles(roles);
                 admin.setFullName("Admin");
                 admin.setEmail("admin@email.com");
+                admin.setGender(true);
+                admin.setDob(LocalDate.of(2003, 7,12));
+                admin.setStatus(Status.ACTIVE);
+                admin.setAddress("Trường Đại Học Cần Thơ - Cần Thơ");
+                admin.setPhone("0944653870");
+                admin.setStartDate(LocalDate.now());
                 admin.setPassword(passwordEncoder.encode("admin"));
                 medicalStaffRepository.save(admin);
 

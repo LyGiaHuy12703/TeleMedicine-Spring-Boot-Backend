@@ -17,12 +17,12 @@ public class PrescriptionMedicine {
     String id;
 
     @ManyToOne
-    @JoinColumn(name = "medicine_id")
+    @JoinColumn(name = "medicine_id", nullable = false)
     @JsonBackReference
     Medicine medicine;
 
     @ManyToOne
-    @JoinColumn(name = "prescription_id")
+    @JoinColumn(name = "prescription_id", nullable = false)
     @JsonBackReference
     Prescription prescription;
 }

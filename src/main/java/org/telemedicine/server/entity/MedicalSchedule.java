@@ -2,6 +2,8 @@ package org.telemedicine.server.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.telemedicine.server.enums.StatusSchedule;
@@ -20,11 +22,22 @@ public class MedicalSchedule {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
+    @NotNull(message = "Appointment date is required")
     LocalDate appointmentDate;
+
+    @NotNull(message = "Appointment time is required")
     Time appointmentTime;
-    LocalDate appointmentCreateDateTime;
+
+    @NotNull(message = "Appointment creation date is required")
+    LocalDate appointmentCreateDate;
+
+    @NotNull(message = "Status is required")
+    @Enumerated(EnumType.STRING)
     StatusSchedule status;
+
     int orderNumber;
+
+    @Size(max = 255, message = "Reason for visit cannot exceed 255 characters")
     String lyDoKham;
 
     @ManyToOne

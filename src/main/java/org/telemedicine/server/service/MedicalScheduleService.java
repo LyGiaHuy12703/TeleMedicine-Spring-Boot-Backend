@@ -55,7 +55,7 @@ public class MedicalScheduleService {
         }
         MedicalSchedule medicalSchedule = MedicalSchedule.builder()
                 .lyDoKham(request.getLyDoKham())
-                .appointmentCreateDateTime(LocalDate.now())
+                .appointmentCreateDate(LocalDate.now())
                 .appointmentDate(request.getAppointmentDate())
                 .appointmentTime(request.getAppointmentTime())
                 .status(StatusSchedule.PENDING)

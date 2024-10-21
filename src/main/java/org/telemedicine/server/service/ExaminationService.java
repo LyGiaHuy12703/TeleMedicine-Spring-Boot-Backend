@@ -46,7 +46,7 @@ public class ExaminationService {
                 .clinic(clinic)
                 .serviceEntity(service)
                 .patients(patients)
-                .Datetime(date)
+                .examinationDate(date)
                 .build();
         return examinationMapper.toExaminationResponse(examinationRepository.save(examination));
     }

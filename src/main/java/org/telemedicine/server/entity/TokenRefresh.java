@@ -1,6 +1,8 @@
 package org.telemedicine.server.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -17,7 +19,9 @@ public class TokenRefresh {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
     @Column(length = 500)
+    @NotBlank(message = "Token is required")
     String token;
+    @NotNull(message = "Creation date is required")
     @Column(length = 500)
     String refreshToken;
     Date createAt;

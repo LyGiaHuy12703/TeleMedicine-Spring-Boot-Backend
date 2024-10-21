@@ -2,11 +2,12 @@ package org.telemedicine.server.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
-
 
 @Entity
 @Data
@@ -17,7 +18,12 @@ public class MedicalHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
+
+    @NotBlank(message = "Medical history info is required")
+    @Column(length = 500) // Set a reasonable length for medical history information
     String medicalHistoryInfo;
+
+    @NotNull(message = "Date is required")
     LocalDate date;
 
     @ManyToOne
