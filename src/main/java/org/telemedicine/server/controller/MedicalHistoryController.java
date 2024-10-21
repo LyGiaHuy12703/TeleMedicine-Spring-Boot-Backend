@@ -7,9 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import org.telemedicine.server.dto.api.ApiResponse;
 import org.telemedicine.server.dto.medicalHistory.MedicalHistoryRequest;
 import org.telemedicine.server.dto.medicalHistory.MedicalHistoryResponse;
-import org.telemedicine.server.dto.medicalRecordBook.MedicalRecordBookRequest;
-import org.telemedicine.server.dto.medicalRecordBook.MedicalRecordBookResponse;
-import org.telemedicine.server.entity.MedicalHistory;
 import org.telemedicine.server.service.PatientService;
 
 import java.util.List;

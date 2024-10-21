@@ -2,6 +2,7 @@ package org.telemedicine.server.controller;
 
 import com.cloudinary.Api;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,6 +11,7 @@ import org.telemedicine.server.dto.medicalSchedule.MedicalScheduleRequest;
 import org.telemedicine.server.dto.medicalSchedule.MedicalScheduleResponse;
 import org.telemedicine.server.service.MedicalScheduleService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -29,7 +31,7 @@ public class MedicalScheduleController {
     }
     //lay lich hen cua ban than
     @GetMapping
-    ResponseEntity<ApiResponse<List<MedicalScheduleResponse>>> getMedicalSchedules() {
+    ResponseEntity<ApiResponse<List<MedicalScheduleResponse>>> getYourMedicalSchedules() {
         ApiResponse<List<MedicalScheduleResponse>> apiResponse = ApiResponse.<List<MedicalScheduleResponse>>builder()
                 .code("MedicalSchedule-s-02")
                 .message("get all your Medical Schedule successful")
@@ -38,7 +40,7 @@ public class MedicalScheduleController {
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
     //lay tat ca lich hen
-    @GetMapping
+    @GetMapping("/all")
     ResponseEntity<ApiResponse<List<MedicalScheduleResponse>>> getAllMedicalSchedules() {
         ApiResponse<List<MedicalScheduleResponse>> apiResponse = ApiResponse.<List<MedicalScheduleResponse>>builder()
                 .code("MedicalSchedule-s-03")
@@ -48,7 +50,18 @@ public class MedicalScheduleController {
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
     //lay lich hen theo ngay
-//    @GetMapping
+    @GetMapping("/byDate")
+    ResponseEntity<ApiResponse<List<MedicalScheduleResponse>>> getMedicalSchedulesByDate(
+            @RequestParam("date")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+            LocalDate date) {
+        ApiResponse<List<MedicalScheduleResponse>> apiResponse = ApiResponse.<List<MedicalScheduleResponse>>builder()
+                .code("MedicalSchedule-s-04")
+                .message("get all your Medical Schedule successful")
+                .data(medicalScheduleService.getByDate(date))
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
+    }
 
     //lay lich hen theo id
     @GetMapping("{id}")

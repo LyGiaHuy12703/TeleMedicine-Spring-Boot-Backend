@@ -13,5 +13,5 @@ public interface MedicalHistoryMapper {
     MedicalHistory toMedicalHistory(MedicalHistoryRequest medicalHistory);
     MedicalHistoryResponse toMedicalHistoryResponse(MedicalHistory medicalHistory);
     List<MedicalHistoryResponse> toMedicalHistoryResponses(List<MedicalHistory> medicalHistories);
-    MedicalHistoryResponse toUpdatedMedicalHistory(MedicalHistoryRequest request, @MappingTarget MedicalHistory medicalHistory);
+//    MedicalHistoryResponse toUpdatedMedicalHistory(MedicalHistoryRequest request, @MappingTarget MedicalHistory medicalHistory);
 }

@@ -5,18 +5,20 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDate;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RoomSchedule {
     @Id
-    Date date;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    String id;
+
+    LocalDate date;
 
     @ManyToOne
     @JoinColumn(name = "clinic_id")

@@ -123,7 +123,7 @@ public class PatientService {
         if (patients == null) {
             throw new AppException(HttpStatus.NOT_FOUND, "patient not found", "medicalRecordBook-e-04");
         }
-        MedicalRecordBook medicalRecordBook = medicalRecordBookRepository.findByPatientId(patients.getId());
+        MedicalRecordBook medicalRecordBook = medicalRecordBookRepository.findByPatientsId(patients.getId());
         if (medicalRecordBook == null) {
             throw new AppException(HttpStatus.NOT_FOUND, "medicalRecordBook not found", "medicalRecordBook-e-05");
         }
@@ -136,7 +136,7 @@ public class PatientService {
         if (patients == null) {
             throw new AppException(HttpStatus.NOT_FOUND, "patient not found", "medicalRecordBook-e-04");
         }
-        MedicalRecordBook medicalRecordBook = medicalRecordBookRepository.findByPatientId(patients.getId());
+        MedicalRecordBook medicalRecordBook = medicalRecordBookRepository.findByPatientsId(patients.getId());
         if (medicalRecordBook == null) {
             throw new AppException(HttpStatus.NOT_FOUND, "medicalRecordBook not found", "medicalRecordBook-e-05");
         }
@@ -169,7 +169,7 @@ public class PatientService {
         if (patients == null) {
             throw new AppException(HttpStatus.NOT_FOUND, "patient not found", "medicalHistory-e-02");
         }
-        MedicalRecordBook medicalRecordBook = medicalRecordBookRepository.findByPatientId(patients.getId());
+        MedicalRecordBook medicalRecordBook = medicalRecordBookRepository.findByPatientsId(patients.getId());
         if (medicalRecordBook == null) {
             throw new AppException(HttpStatus.NOT_FOUND, "medicalRecordBook not found", "medicalHistory-e-03");
         }

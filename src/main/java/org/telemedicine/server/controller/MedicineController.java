@@ -35,7 +35,7 @@ public class MedicineController {
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
     @GetMapping("/{id}")
-    ResponseEntity<ApiResponse<MedicineResponse>> getMedicineById(@PathVariable("id") Long id) {
+    ResponseEntity<ApiResponse<MedicineResponse>> getMedicineById(@PathVariable("id") String id) {
         ApiResponse<MedicineResponse> apiResponse = ApiResponse.<MedicineResponse>builder()
                 .message("medicine with id " + id)
                 .code("medicine-s-03")
@@ -44,7 +44,7 @@ public class MedicineController {
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
     @PutMapping("/{id}")
-    ResponseEntity<ApiResponse<MedicineResponse>> updateMedicine(@PathVariable("id") Long id, @RequestBody MedicineRequest medicineRequest) {
+    ResponseEntity<ApiResponse<MedicineResponse>> updateMedicine(@PathVariable("id") String id, @RequestBody MedicineRequest medicineRequest) {
         ApiResponse<MedicineResponse> apiResponse = ApiResponse.<MedicineResponse>builder()
                 .message("Update medicine id: " + id +" success")
                 .code("medicine-s-04")
@@ -53,7 +53,7 @@ public class MedicineController {
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
     @DeleteMapping("/{id}")
-    ResponseEntity<ApiResponse<Void>> deleteMedicine(@PathVariable("id") Long id) {
+    ResponseEntity<ApiResponse<Void>> deleteMedicine(@PathVariable("id") String id) {
         medicineService.deleteMedicine(id);
         ApiResponse<Void> apiResponse = ApiResponse.<Void>builder()
                 .message("Delete Drug id: " + id +" success")

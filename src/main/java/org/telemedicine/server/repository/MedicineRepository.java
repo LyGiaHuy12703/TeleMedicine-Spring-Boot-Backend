@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface MedicineRepository extends JpaRepository<Medicine, Long> {
+public interface MedicineRepository extends JpaRepository<Medicine, String> {
     List<Medicine> findByDrugId(String id);
     Boolean existsByName(String medicineName);
 }

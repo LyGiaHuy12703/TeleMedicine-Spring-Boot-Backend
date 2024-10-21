@@ -6,5 +6,5 @@ import org.telemedicine.server.entity.MedicalRecordBook;
 
 @Repository
 public interface MedicalRecordBookRepository extends JpaRepository<MedicalRecordBook, String> {
-    MedicalRecordBook findByPatientId(String patientID);
+    MedicalRecordBook findByPatientsId(String patientID);
 }

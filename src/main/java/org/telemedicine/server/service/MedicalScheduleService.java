@@ -10,7 +10,6 @@ import org.telemedicine.server.dto.medicalSchedule.MedicalScheduleResponse;
 import org.telemedicine.server.entity.MedicalSchedule;
 import org.telemedicine.server.entity.MedicalStaff;
 import org.telemedicine.server.entity.Patients;
-import org.telemedicine.server.entity.Registration;
 import org.telemedicine.server.enums.StatusSchedule;
 import org.telemedicine.server.exception.AppException;
 import org.telemedicine.server.mapper.MedicalScheduleMapper;
@@ -76,16 +75,21 @@ public class MedicalScheduleService {
         List<MedicalSchedule> medicalSchedules = medicalScheduleRepository.findByPatientsId(patients.getId());
         return medicalScheduleMapper.toMedicalScheduleResponses(medicalSchedules);
     }
+    public MedicalScheduleResponse getMedicalScheduleById(String medicalScheduleId) {
+        return medicalScheduleMapper.toMedicalScheduleResponse(medicalScheduleRepository.findById(medicalScheduleId).orElse(null));
+    }
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<MedicalScheduleResponse> getByDate(LocalDate date) {
+        List<MedicalSchedule> medicalSchedules = medicalScheduleRepository.findByAppointmentDate(date);
+        return medicalScheduleMapper.toMedicalScheduleResponses(medicalSchedules);
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     public List<MedicalScheduleResponse> getAllMedicalSchedules() {
         return medicalScheduleMapper.toMedicalScheduleResponses(medicalScheduleRepository.findAll());
     }
-    public MedicalScheduleResponse getMedicalScheduleById(String medicalScheduleId) {
-        return medicalScheduleMapper.toMedicalScheduleResponse(medicalScheduleRepository.findById(medicalScheduleId).orElse(null));
-    }
-//    public MedicalScheduleResponse updateYourMedicalSchedule(MedicalScheduleRequest medicalScheduleRequest) {
-//
-//    }
+
+
     @PreAuthorize("hasRole('ADMIN')")
     public MedicalScheduleResponse updateStatusMedicalSchedule(String id, String status) {
         MedicalSchedule medicalSchedule = medicalScheduleRepository.findById(id).orElse(null);

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.telemedicine.server.enums.StatusClinic;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,7 +20,7 @@ public class Clinic {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
     String name;
-    String status;
+    StatusClinic status;
 
     @OneToMany(mappedBy = "clinic", cascade = CascadeType.ALL,orphanRemoval = true)
     @JsonManagedReference

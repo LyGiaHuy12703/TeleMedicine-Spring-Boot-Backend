@@ -7,8 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import org.telemedicine.server.dto.api.ApiResponse;
 import org.telemedicine.server.dto.service.ServiceRequest;
 import org.telemedicine.server.dto.service.ServiceResponse;
-import org.telemedicine.server.dto.specialties.SpecialtiesRequest;
-import org.telemedicine.server.dto.specialties.SpecialtiesResponse;
 import org.telemedicine.server.service.ServiceService;
 
 import java.util.List;

@@ -33,7 +33,18 @@ public class MedicineService {
         if(medicineRepository.existsByName(medicineRequest.getName())) {
             throw new AppException(HttpStatus.BAD_REQUEST, "Medicine already exists", "medicine-e-01");
         }
-        Medicine medicine = medicineMapper.toMedicine(medicineRequest);
+        Medicine medicine = Medicine.builder()
+                .name(medicineRequest.getName())
+                .chiDinh(medicineRequest.getChiDinh())
+                .chongChiDinh(medicineRequest.getChongChiDinh())
+                .chuYKhiSUDung(medicineRequest.getChuYKhiSUDung())
+                .dangBaoChe(medicineRequest.getDangBaoChe())
+                .lieu_cachDung(medicineRequest.getLieu_cachDung())
+                .nhomThuoc_tacDung(medicineRequest.getNhomThuoc_tacDung())
+                .tacDungKMongMuon(medicineRequest.getTacDungKMongMuon())
+                .taiLieuThamKhao(medicineRequest.getTaiLieuThamKhao())
+                .thanTrong(medicineRequest.getThanTrong())
+                .build();
         Drug drug = drugsRepository.findById(medicineRequest.getDrug())
                 .orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "Drug not found", "medicine-e-02"));
         medicine.setDrug(drug);
@@ -44,19 +55,34 @@ public class MedicineService {
                 .orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "Drug not found", "medicine-e-03"));
         return medicineMapper.toMedicineResponseList(medicineRepository.findByDrugId(id));
     }
-    public MedicineResponse getMedicineById(Long id) {
+    public MedicineResponse getMedicineById(String id) {
         Medicine medicine = medicineRepository.findById(id)
                 .orElseThrow(()-> new AppException(HttpStatus.BAD_REQUEST, "Medicine not found", "medicine-e-04"));
         return medicineMapper.toMedicineResponse(medicine);
     }
     @PreAuthorize("hasRole('ADMIN')")
-    public MedicineResponse updateMedicine(Long id, MedicineRequest medicineRequest) {
+    public MedicineResponse updateMedicine(String id, MedicineRequest medicineRequest) {
         Medicine medicine = medicineRepository.findById(id)
                 .orElseThrow(()-> new AppException(HttpStatus.BAD_REQUEST, "Medicine not found", "medicine-e-05"));
-        return medicineMapper.toMedicineResponse(medicineMapper.updateMedicine(medicineRequest, medicine));
+        medicine.setName(medicineRequest.getName());
+        medicine.setChiDinh(medicineRequest.getChiDinh());
+        medicine.setChongChiDinh(medicineRequest.getChongChiDinh());
+        medicine.setDangBaoChe(medicineRequest.getDangBaoChe());
+        medicine.setChuYKhiSUDung(medicineRequest.getChuYKhiSUDung());
+        medicine.setLieu_cachDung(medicineRequest.getLieu_cachDung());
+        medicine.setNhomThuoc_tacDung(medicineRequest.getNhomThuoc_tacDung());
+        medicine.setThanTrong(medicineRequest.getThanTrong());
+        medicine.setTacDungKMongMuon(medicineRequest.getTacDungKMongMuon());
+        medicine.setTaiLieuThamKhao(medicineRequest.getTaiLieuThamKhao());
+
+        Drug drug = drugsRepository.findById(medicineRequest.getDrug())
+                .orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "Drug not found", "medicine-e-02"));
+        medicine.setDrug(drug);
+
+        return medicineMapper.toMedicineResponse(medicineRepository.save(medicine));
     }
     @PreAuthorize("hasRole('ADMIN')")
-    public void deleteMedicine(Long id) {
+    public void deleteMedicine(String id) {
         Medicine medicine = medicineRepository.findById(id)
                 .orElseThrow(()-> new AppException(HttpStatus.BAD_REQUEST, "Medicine not found", "medicine-e-06"));
         List<PrescriptionMedicine> prescriptionMedicines = prescriptionMedicineRepository.findByMedicine(medicine);
