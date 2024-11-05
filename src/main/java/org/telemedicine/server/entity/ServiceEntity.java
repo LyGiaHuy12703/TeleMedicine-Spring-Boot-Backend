@@ -19,10 +19,8 @@ public class ServiceEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @NotBlank(message = "Type is required")
     String type;
 
-    @NotBlank(message = "Price is required")
     String price;
 
     @OneToMany(mappedBy = "serviceEntity", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -20,10 +20,9 @@ public class Specialties {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @NotBlank(message = "Name is required")
     String name;
 
-    @OneToMany(mappedBy = "specialties", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany(mappedBy = "specialties", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JsonManagedReference
-    List<MedicalStaff> medicalStaffs = new ArrayList<>();
+    List<MedicalStaff> staffs = new ArrayList<>();
 }

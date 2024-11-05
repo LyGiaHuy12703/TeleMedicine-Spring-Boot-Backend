@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.telemedicine.server.entity.MedicalStaff;
 import org.telemedicine.server.entity.Patients;
+import org.telemedicine.server.enums.Role;
 import org.telemedicine.server.exception.AppException;
 
 import java.text.ParseException;
@@ -51,14 +52,14 @@ public class helper {
     }
 
     //build scope for user
-    public String buildScopeUser(Patients patients){
-        StringJoiner stringJoiner = new StringJoiner(" ");//phân cách bằng dấu cách
-        if(!CollectionUtils.isEmpty(patients.getRoles())){
-            patients.getRoles().forEach(stringJoiner::add);
-        }
-
-        return stringJoiner.toString();
-    }
+//    public String buildScopeUser(Patients patients){
+//        StringJoiner stringJoiner = new StringJoiner(" ");//phân cách bằng dấu cách
+//        if(!CollectionUtils.isEmpty(patients.getRole())){
+//            patients.getRoles().forEach(stringJoiner::add);
+//        }
+//
+//        return stringJoiner.toString();
+//    }
 
     //generate token cho user
     public String generateTokenPatient(
@@ -76,7 +77,7 @@ public class helper {
                 .issuer("telemedicine.com")
                 .issueTime(new Date())
                 .expirationTime(expirationTimeVar)
-                .claim("scope",buildScopeUser(patients))
+                .claim("scope", Role.USER.toString())
                 .claim("name",patients.getFullName())
                 .build();
         Payload payload = new Payload(claimsSet.toJSONObject());

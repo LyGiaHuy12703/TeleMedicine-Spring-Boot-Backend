@@ -21,7 +21,7 @@ public class RoomScheduleController {
     private RoomScheduleService roomScheduleService;
 
     @PostMapping("create")
-    ResponseEntity<ApiResponse<RoomScheduleResponse>> create(RoomScheduleRequest request) {
+    ResponseEntity<ApiResponse<RoomScheduleResponse>> create(@RequestBody RoomScheduleRequest request) {
         ApiResponse<RoomScheduleResponse> apiResponse = ApiResponse.<RoomScheduleResponse>builder()
                 .code("roomSchedule-s-01")
                 .message("Room schedule created successful")
@@ -29,6 +29,17 @@ public class RoomScheduleController {
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
+    //get tất cả
+    @GetMapping
+    ResponseEntity<ApiResponse<List<RoomScheduleResponse>>> getAll() {
+        ApiResponse<List<RoomScheduleResponse>> apiResponse = ApiResponse.<List<RoomScheduleResponse>>builder()
+                .code("roomSchedule-s-06")
+                .message("Get all room schedule")
+                .data(roomScheduleService.getAll())
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
+    }
+
 //    gettheo ngay
     @GetMapping("/byDate")
     ResponseEntity<ApiResponse<List<RoomScheduleResponse>>> findByDate(

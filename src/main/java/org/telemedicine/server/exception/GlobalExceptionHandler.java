@@ -1,13 +1,17 @@
 package org.telemedicine.server.exception;
 
+import org.springframework.boot.context.properties.bind.validation.ValidationErrors;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.telemedicine.server.dto.api.ApiResponse;
+import org.telemedicine.server.dto.api.ValidationError;
 
 import javax.naming.AuthenticationException;
 import java.nio.file.AccessDeniedException;
+import java.util.List;
 import java.util.stream.Collectors;
 
 
@@ -27,19 +31,19 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     ResponseEntity<ApiResponse<Void>> handlingMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        String errorMessage = e.getBindingResult()
+        List<ValidationError> errors = e.getBindingResult()
                 .getFieldErrors()
                 .stream()
-                .map(fieldError -> fieldError.getField().toUpperCase() + ": " + fieldError.getDefaultMessage())
-                .collect(Collectors.joining(", "));
+                .map(fieldError -> new ValidationError(fieldError.getField(), fieldError.getDefaultMessage()))
+                .collect(Collectors.toList());
 
         ApiResponse<Void> response = ApiResponse.<Void>builder()
                 .success(false)
-                .message(errorMessage)
+                .errors(errors)
                 .code("global-e-01")
                 .build();
 
-        return ResponseEntity.status(400).body(response);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
     @ExceptionHandler(value = AuthenticationException.class)
@@ -59,7 +63,7 @@ public class GlobalExceptionHandler {
                 .code("auth-e-02")
                 .message("Không có quyền truy cập: " + e.getMessage())
                 .build();
-        return ResponseEntity.status(403).body(response); // 403 Forbidden
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response); // 403 Forbidden
     }
 
     @ExceptionHandler(value = Exception.class)

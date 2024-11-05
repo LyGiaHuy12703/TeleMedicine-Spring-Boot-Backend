@@ -18,17 +18,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.telemedicine.server.dto.auth.*;
 import org.telemedicine.server.dto.patients.PatientCreationRequest;
-import org.telemedicine.server.entity.Token;
-import org.telemedicine.server.entity.MedicalStaff;
-import org.telemedicine.server.entity.Patients;
-import org.telemedicine.server.entity.TokenRefresh;
+import org.telemedicine.server.entity.*;
 import org.telemedicine.server.enums.Role;
 import org.telemedicine.server.exception.AppException;
 import org.telemedicine.server.mapper.PatientMapper;
-import org.telemedicine.server.repository.RefreshTokenRepository;
-import org.telemedicine.server.repository.TokenRepository;
-import org.telemedicine.server.repository.MedicalStaffRepository;
-import org.telemedicine.server.repository.PatientRepository;
+import org.telemedicine.server.repository.*;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
@@ -54,6 +48,7 @@ public class AuthService {
     TokenRepository tokenRepository;
     private final org.telemedicine.server.utils.helper helper;
     RefreshTokenRepository refreshTokenRepository;
+    private final MedicalRecordBookRepository medicalRecordBookRepository;
 
     @NonFinal
     @Value("${jwt.accessToken}")
@@ -67,86 +62,46 @@ public class AuthService {
     @NonFinal
     @Value("${jwt.expiryTimeRefreshToken}")
     protected int TOKEN_REFRESH_EXPIRY_TIME;
-    public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
-        var token = request.getToken();
-        boolean isValid = true;
-
-        try {
-            verifyTokenPrivate(token, false);
-        } catch (AppException e) {
-            isValid = false;
-        }
-
-        return IntrospectResponse.builder().valid(isValid).build();
-    }
-    private SignedJWT verifyTokenPrivate(String token, boolean isRefersh) throws JOSEException, ParseException {
-        JWSVerifier verifier = new MACVerifier(ACCESS_TOKEN_SECRET.getBytes());
-
-        SignedJWT signedJWT = SignedJWT.parse(token);
-
-        //lấy thời gian hết hạn
-        Date expityTime = (isRefersh)
-                ?new Date(signedJWT.getJWTClaimsSet().getIssueTime()
-                .toInstant().plus(TOKEN_REFRESH_EXPIRY_TIME, ChronoUnit.SECONDS).toEpochMilli())
-                :signedJWT.getJWTClaimsSet().getExpirationTime();
-
-        //trả về true or false token hết hạn
-        boolean verified = signedJWT.verify(verifier);
-        if(!(verified && expityTime.after(new Date()))){
-            throw new AppException(HttpStatus.BAD_REQUEST, "Unauthenticated", "auth-e-03");
-        }
-
-        if(tokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
-            throw new AppException(HttpStatus.BAD_REQUEST, "Unauthenticated", "auth-e-03");
-
-        return signedJWT;
-    }
     // dang ky cho user
-    public void signUp(PatientCreationRequest request) throws MessagingException {
+    public void register(PatientCreationRequest request) throws MessagingException {
         //tim email tồn tại không cho đăng ký
         if(patientRepository.existsByEmail(request.getEmail()))
             throw new AppException(HttpStatus.BAD_REQUEST, "Email has existed", "auth-e-01");
-
-        Patients patient = patientMapper.toPatient(request);
-
-        patient.setPassword(passwordEncoder.encode(request.getPassword()));
-
-        HashSet<String> roles = new HashSet<>();
-
-        roles.add(Role.USER.toString());
-
-        patient.setRoles(roles);
-
-        patientRepository.save(patient);
-        //tạo token xác thực
-        String verifyToken = helper.generateTempPwd(32);
-
-        Token token = new Token();
-        token.setToken(verifyToken);
-        token.setPatients(patient);
-        tokenRepository.save(token);
-
-        //gửi mail xác nhận
-        String confirmationUrl = "http://localhost:8080/api/auth/verify/" + verifyToken;
-        String message = "<p>Xin chào,</p>"
-                + "<p>Vui lòng nhấn vào liên kết dưới đây để xác thực địa chỉ email của bạn:</p>"
-                + "<p><a href=\"" + confirmationUrl + "\">Xác thực tài khoản</a></p>";
-        mailService.sendVerificationMail(patient.getEmail(), message);
     }
     //verify email user
-    public boolean verifyUser(String token) {
-        Token verificationToken = tokenRepository.findByToken(token);
-
-        if (verificationToken == null) {
-            return false;
+    public AuthResponse verifyRegister(PatientCreationRequest request) {
+        // Find user if not existed
+        boolean existedUser = patientRepository.existsByEmail(request.getEmail());
+        if(existedUser){
+            throw new AppException(HttpStatus.BAD_REQUEST, "Email has existed", "auth-e-01");
         }
+        // Hash password
+        String hashedPassword = passwordEncoder.encode(request.getPassword());
+        request.setPassword(hashedPassword);
 
-        Patients patients = verificationToken.getPatients();
-        patients.setVerified(true);
+        // Roles for normal user
+        Role role = Role.USER;
+        Patients patients = Patients.builder()
+                .email(request.getEmail())
+                .fullName(request.getFullName())
+                .password(request.getPassword())
+                .build();
+        patients.setRole(role);
         patientRepository.save(patients);
-        tokenRepository.delete(verificationToken); // Xóa token sau khi xác nhận
 
-        return true;
+        MedicalRecordBook medicalRecordBook = MedicalRecordBook.builder()
+                .patients(patients)
+                .build();
+        medicalRecordBookRepository.save(medicalRecordBook);
+
+        // Generate a pair of token
+        String accessToken = helper.generateTokenPatient(patients,TOKEN_EXPIRY_TIME,ACCESS_TOKEN_SECRET,null);
+        String refreshToken = helper.generateTokenPatient(patients,TOKEN_REFRESH_EXPIRY_TIME,REFRESH_TOKEN_SECRET,null);
+
+        return AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
     }
     //changePassword
     public void changePassword(PasswordChangeRequest request){
@@ -161,7 +116,7 @@ public class AuthService {
         boolean verified = passwordEncoder.matches(request.getPassword(), patients.getPassword());
 
         if(!verified){
-            throw new AppException(HttpStatus.BAD_REQUEST, "Password invalid", "auth-e-02");
+            throw new AppException(HttpStatus.BAD_REQUEST, "Mật khẩu không đúng", "auth-e-02");
         }
         patients.setPassword(passwordEncoder.encode(request.getNewPassword()));
         patientRepository.save(patients);
@@ -180,13 +135,13 @@ public class AuthService {
     //authentication user
     public AuthResponse loginUser(AuthRequest request){
         Patients patient = patientRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found", "auth-e-03"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Login fail", "auth-e-03"));
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(request.getPassword(), patient.getPassword());
 
-        if(!authenticated || !patient.isVerified()){
-            throw new AppException(HttpStatus.BAD_REQUEST, "UnAuthenticated", "auth-e-04");
+        if(!authenticated){
+            throw new AppException(HttpStatus.BAD_REQUEST, "Login fail", "auth-e-04");
         }
 
         var accessToken = helper.generateTokenPatient(patient, TOKEN_EXPIRY_TIME, ACCESS_TOKEN_SECRET, null);
@@ -209,19 +164,19 @@ public class AuthService {
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .role(helper.buildScopeUser(patient))
+                .role(Role.USER.toString())
                 .build();
     }
     //authentication staff
     public AuthResponse loginStaff(AuthRequest request){
         var staff = medicalStaffRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Staff not found", "auth-e-03"));
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Login fail", "auth-e-03"));
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(request.getPassword(), staff.getPassword());
 
         if(!authenticated){
-            throw new AppException(HttpStatus.BAD_REQUEST, "UnAuthenticated", "auth-e-04");
+            throw new AppException(HttpStatus.BAD_REQUEST, "Login fail", "auth-e-04");
         }
 
         var accessToken = helper.generateTokenStaff(staff, TOKEN_EXPIRY_TIME, ACCESS_TOKEN_SECRET, null);

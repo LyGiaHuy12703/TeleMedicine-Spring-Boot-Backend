@@ -16,6 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MedicalRecordBookResponse {
+    String id;
     String fullName;
     boolean gender;
     Date dob;

@@ -14,4 +14,5 @@ public interface MedicalStaffRepository extends JpaRepository<MedicalStaff, Stri
     Boolean existsByEmail(String email);
     MedicalStaff findMedicalStaffById(String id);
     List<MedicalStaff> findMedicalStaffBySpecialtiesId(String id);
+    long count();
 }

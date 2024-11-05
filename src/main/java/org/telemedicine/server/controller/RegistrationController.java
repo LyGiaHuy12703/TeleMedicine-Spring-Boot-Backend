@@ -5,8 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.telemedicine.server.dto.api.ApiResponse;
-import org.telemedicine.server.dto.drug.DrugResponse;
-import org.telemedicine.server.dto.registration.RegistrationRequest;
 import org.telemedicine.server.dto.registration.RegistrationResponse;
 import org.telemedicine.server.service.RegistrationService;
 
@@ -32,7 +30,7 @@ public class RegistrationController {
 //        return registrationService.getAllRegistration();
 //    }
     @GetMapping()
-    ResponseEntity<ApiResponse<RegistrationResponse>> getDeugById(){
+    ResponseEntity<ApiResponse<RegistrationResponse>> getById(){
         ApiResponse<RegistrationResponse> apiResponse = ApiResponse.<RegistrationResponse>builder()
                 .message("Get registration of user success " )
                 .code("registration-s-02")

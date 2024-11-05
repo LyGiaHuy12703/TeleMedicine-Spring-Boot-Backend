@@ -11,13 +11,10 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PatientCreationRequest {
-    String id;
-    @Size(min = 5, message = "FULL_NAME_INVALID")
+    @Size(min = 5, message = "Tên ít nhất 5 ký tự")
     String fullName;
-    @Email(message = "INVALID_EMAIL")
+    @Email(message = "Email không đúng định dạng")
     String email;
-    @Size(min = 6, message = "PASSWORD_INVALID")
+    @Size(min = 5, message = "Password ít nhất 5 ký tự")
     String password;
-    String verifyCode;
-    boolean verified=false;
 }

@@ -1,5 +1,6 @@
 package org.telemedicine.server.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -19,14 +20,12 @@ public class Token {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @NotBlank(message = "Token is required")
     @Column(length = 500)
     String token;
 
     @Column(length = 500)
     String refreshToken;
 
-    @NotNull(message = "Creation date is required")
     Date createAt;
 
     @OneToOne(targetEntity = Patients.class, fetch = FetchType.EAGER)

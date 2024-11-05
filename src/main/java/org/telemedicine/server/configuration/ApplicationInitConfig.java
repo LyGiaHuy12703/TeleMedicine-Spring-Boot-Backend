@@ -23,7 +23,7 @@ import java.util.HashSet;
 public class ApplicationInitConfig {
 
     PasswordEncoder passwordEncoder;
-    //dduowjc khoi chay khiu du an duoc start
+
     @Bean
     ApplicationRunner applicationRunner(MedicalStaffRepository medicalStaffRepository) {
         return args -> {
@@ -36,7 +36,7 @@ public class ApplicationInitConfig {
                 admin.setFullName("Admin");
                 admin.setEmail("admin@email.com");
                 admin.setGender(true);
-                admin.setDob(LocalDate.of(2003, 7,12));
+                admin.setDob(LocalDate.of(2003, 7, 12));
                 admin.setStatus(Status.ACTIVE);
                 admin.setAddress("Trường Đại Học Cần Thơ - Cần Thơ");
                 admin.setPhone("0944653870");
@@ -44,8 +44,9 @@ public class ApplicationInitConfig {
                 admin.setPassword(passwordEncoder.encode("admin"));
                 medicalStaffRepository.save(admin);
 
-                log.warn("admin has been created with default password: admin, please change it");
+                log.warn("Admin has been created with default password: admin, please change it");
+                log.warn("Admin roles: " + admin.getRoles());
             }
         };
-    };
+    }
 }

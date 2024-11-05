@@ -18,7 +18,6 @@ public class Drug {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
-    @NotBlank(message = "Medicine name is required")
     @Column(length = 100)
     String name;
 

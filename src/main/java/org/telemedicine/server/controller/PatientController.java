@@ -35,9 +35,9 @@ public class PatientController {
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
     //chỉ lấy được thông tin của chỉnh mình hoặc admin lấy
-    @PostAuthorize(value = "returnObject.data.email == authentication.name || hasRole('ADMIN')") //thực hiện method xong thì phân quyền //thực tế ít sử dụng hơn preauthorize
+    @PostAuthorize(value = "hasRole('ADMIN')") //thực hiện method xong thì phân quyền //thực tế ít sử dụng hơn preauthorize
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<PatientResponse>> getPatientByEmail(@PathVariable("id") String id) {
+    public ResponseEntity<ApiResponse<PatientResponse>> getPatientById(@PathVariable("id") String id) {
         log.info("in method getPatientByEmail");
         ApiResponse<PatientResponse> apiResponse = ApiResponse.<PatientResponse>builder()
                 .data(patientService.getPatientById(id))

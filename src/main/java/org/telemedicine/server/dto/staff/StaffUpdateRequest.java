@@ -2,8 +2,11 @@ package org.telemedicine.server.dto.staff;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.cglib.core.Local;
 
+import java.time.LocalDate;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -13,16 +16,17 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class StaffUpdateRequest {
     String fullName;
-    String email;
     String password;
     boolean gender;
-    Date dob;
+    LocalDate dob;
     String phone;
     String address;
-    Date startDate;
+    LocalDate startDate;
     String practicingCertificate;
-    String department;
+    List<String> specialtiesId;
     String status;
-
     Set<String> roles;
+    Set<String> hocHam;
+    Set<String> hocVi;
+    boolean isEnable;
 }

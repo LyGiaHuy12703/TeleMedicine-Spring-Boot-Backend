@@ -24,10 +24,11 @@ public class StaffResponse {
     String address;
     Date startDate;
     String practicingCertificate;
-    String department;
     Status status;
     String avatar;
     Set<String> roles;
     boolean isEnabled;
-    Specialties specialties;
+    Set<Specialties> specialties;
+    Set<String> hocHam;
+    Set<String> hocVi;
 }

@@ -22,16 +22,12 @@ public class MedicalSchedule {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @NotNull(message = "Appointment date is required")
     LocalDate appointmentDate;
 
-    @NotNull(message = "Appointment time is required")
     Time appointmentTime;
 
-    @NotNull(message = "Appointment creation date is required")
     LocalDate appointmentCreateDate;
 
-    @NotNull(message = "Status is required")
     @Enumerated(EnumType.STRING)
     StatusSchedule status;
 

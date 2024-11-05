@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -61,19 +63,30 @@ public class StaffService {
                 .address(request.getAddress())
                 .dob(request.getDob())
                 .phone(request.getPhone())
-//                .department(request.getDepartment())
                 .gender(request.isGender())
                 .startDate(request.getStartDate())
                 .practicingCertificate(request.getPracticingCertificate())
                 .avatar(avatarUrl)
                 .build();
 
-        Specialties specialties = specialtiesRepository.findById(request.getSpecialtiesId())
-                .orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "Specialties not found", "specialties-e-04"));
-
+        // Lưu các chuyên khoa
+        Set<Specialties> specialties = new HashSet<>();
+        for (String specialtyId : request.getSpecialtiesId()) {
+            Specialties specialty = specialtiesRepository.findById(specialtyId)
+                    .orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "Specialty not found: " + specialtyId, "specialty-not-found"));
+            specialties.add(specialty);
+            specialty.getStaffs().add(staff); // Thiết lập quan hệ hai chiều
+        }
         staff.setSpecialties(specialties);
-        HashSet<String> roles = new HashSet<>();
-        roles.add(request.getRoles().toString());
+        staff.setSpecialties(specialties);
+        HashSet<String> roles = new HashSet<>(request.getRoles());
+
+        HashSet<String> hocHam = new HashSet<>(request.getHocHam());
+        staff.setHocHam(hocHam);
+
+        HashSet<String> hocVi = new HashSet<>(request.getHocVi());
+        staff.setHocVi(hocVi);
+
         staff.setRoles(roles);
         staff.setStatus(Status.ACTIVE);
         staff.setEnabled(true);
@@ -121,9 +134,17 @@ public class StaffService {
         return null; // Trả về null nếu không tìm thấy
     }
 
-    public List<StaffResponse> getAll(){
-        return staffMapper.toListStaffResponse(staffRepository.findAll());
+    public List<StaffResponse> getAll() {
+        List<MedicalStaff> allStaff = staffRepository.findAll();
+
+        // Lọc ra những staff không có role là ADMIN
+        List<MedicalStaff> filteredStaff = allStaff.stream()
+                .filter(staff -> !staff.getRoles().contains ("ADMIN")) // Giả sử bạn có phương thức getRole() trong Staff
+                .collect(Collectors.toList());
+
+        return staffMapper.toListStaffResponse(filteredStaff);
     }
+
     public StaffResponse getStaffById(String id){
         return staffMapper.toStaffResponse(staffRepository.findMedicalStaffById(id));
     }
@@ -131,11 +152,38 @@ public class StaffService {
     public StaffResponse updateStaffById(String id, StaffUpdateRequest request, MultipartFile file) throws IOException {
         MedicalStaff staff = staffRepository.findById(id)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Staff not found", "auth-e-02"));
-        staffMapper.toUpdateStaff(staff, request);
+
+        staff.setAddress(request.getAddress());
+        staff.setDob(request.getDob());
+        staff.setPhone(request.getPhone());
+        staff.setGender(request.isGender());
+        staff.setStartDate(request.getStartDate());
+        staff.setPracticingCertificate(request.getPracticingCertificate());
+        staff.setFullName(request.getFullName());
+        staff.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        // Lưu nhiều chuyên khoa
+        Set<Specialties> specialties = new HashSet<>();
+        for (String specialtyId : request.getSpecialtiesId()) { // Giả sử getSpecialtiesIds trả về danh sách ID chuyên khoa
+            Specialties specialty = specialtiesRepository.findById(specialtyId)
+                    .orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "Specialty not found: " + specialtyId, "specialty-not-found"));
+            specialties.add(specialty);
+        }
+        staff.setSpecialties(specialties);
+        HashSet<String> roles = new HashSet<>(request.getRoles());
+        staff.setRoles(roles);
+
+        HashSet<String> hocHam = new HashSet<>(request.getHocHam());
+        staff.setHocHam(hocHam);
+
+        HashSet<String> hocVi = new HashSet<>(request.getHocVi());
+        staff.setHocVi(hocVi);
         if(!file.isEmpty()){
-            String avatarUrl = uploadImg(file, request.getEmail());
+            String avatarUrl = uploadImg(file, staff.getEmail());
             staff.setAvatar(avatarUrl);
         }
+        staff.setEnabled(request.isEnable());
+        staff.setStatus(Status.valueOf(request.getStatus()));
         staffRepository.save(staff);
         return staffMapper.toStaffResponse(staff);
     }

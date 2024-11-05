@@ -10,7 +10,6 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface MedicalRecordBookMapper {
-    MedicalRecordBook toMedicalRecordBook(MedicalRecordBookRequest request);
     MedicalRecordBookResponse toMedicalRecordBookResponse(MedicalRecordBook book);
     List<MedicalRecordBookResponse> toMedicalRecordBookResponses(List<MedicalRecordBook> books);
     MedicalRecordBook toUpdateMedicalRecordBook(MedicalRecordBookRequest request, @MappingTarget MedicalRecordBook book);

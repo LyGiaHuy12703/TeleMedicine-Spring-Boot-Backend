@@ -10,8 +10,6 @@ import org.telemedicine.server.dto.api.ApiResponse;
 import org.telemedicine.server.dto.staff.StaffCreationRequest;
 import org.telemedicine.server.dto.staff.StaffResponse;
 import org.telemedicine.server.dto.staff.StaffUpdateRequest;
-import org.telemedicine.server.enums.Role;
-import org.telemedicine.server.service.EnumService;
 import org.telemedicine.server.service.StaffService;
 
 import java.io.IOException;
@@ -22,18 +20,6 @@ import java.util.List;
 public class StaffController {
     @Autowired
     private StaffService staffService;
-    @Autowired
-    private EnumService enumService;
-
-    @GetMapping("/roles")
-    ResponseEntity<ApiResponse<List<Role>>> getRoles() {
-        ApiResponse<List<Role>> apiResponse = ApiResponse.<List<Role>>builder()
-                .data(enumService.getRoles())
-                .code("roles-s-01")
-                .message("Get roles successful")
-                .build();
-        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
-    }
 
     @PostMapping("/createStaff")
     ResponseEntity<ApiResponse<StaffResponse>> createStaff(

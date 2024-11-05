@@ -19,7 +19,6 @@ public class RoomSchedule {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @NotNull(message = "Date is required")
     LocalDate date;
 
     @ManyToOne

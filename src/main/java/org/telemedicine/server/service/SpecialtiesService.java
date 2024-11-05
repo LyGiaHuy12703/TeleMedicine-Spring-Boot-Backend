@@ -64,4 +64,8 @@ public class SpecialtiesService {
         specialtiesRepository.deleteById(id);
     }
 
+    public List<SpecialtiesResponse> getSpecialtiesWithMedicalStaffs() {
+        List<Specialties> specialties = specialtiesRepository.findAllWithMedicalStaff();
+        return specialtiesMapper.toSpecialtiesResponseList(specialties);
+    }
 }

@@ -23,25 +23,21 @@ public class Examination {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @NotNull(message = "Examination date and time is required")
     LocalDate examinationDate; // Changed to LocalDateTime for date and time
 
     @ManyToOne
     @JoinColumn(name = "service_id")
     @JsonBackReference
-    @NotNull(message = "Service entity is required")
     ServiceEntity serviceEntity;
 
     @ManyToOne
     @JoinColumn(name = "clinic_id")
     @JsonBackReference
-    @NotNull(message = "Clinic is required")
     Clinic clinic;
 
     @ManyToOne
     @JoinColumn(name = "patient_id")
     @JsonBackReference
-    @NotNull(message = "Patient is required")
     Patients patients;
 
     @OneToMany(mappedBy = "examination", cascade = CascadeType.ALL, orphanRemoval = true)

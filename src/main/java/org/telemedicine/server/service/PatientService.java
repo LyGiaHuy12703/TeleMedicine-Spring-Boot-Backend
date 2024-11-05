@@ -81,7 +81,7 @@ public class PatientService {
         if (patients == null) {
             throw new AppException(HttpStatus.NOT_FOUND, "patient not found", "patients-e-03");
         }
-        patientMapper.toUpdatePatient(patients, request);
+        patients.setFullName(request.getFullName());
         return patientMapper.toPatientResponse(patientRepository.save(patients));
     }
     @PreAuthorize("hasRole('ADMIN')")
@@ -91,14 +91,21 @@ public class PatientService {
     }
 
     //medical record book
+    @PreAuthorize("hasRole('USER')")
     public MedicalRecordBookResponse createMedicalRecordBook(MedicalRecordBookRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Patients patients = patientRepository.findByEmail(email).orElse(null);
         if (patients == null) {
             throw new AppException(HttpStatus.NOT_FOUND, "patient not found", "medicalRecordBook-e-01");
         }
-        MedicalRecordBook medicalRecordBook = medicalRecordBookMapper.toMedicalRecordBook(request);
-        medicalRecordBook.setPatients(patients);
+
+        MedicalRecordBook medicalRecordBook = medicalRecordBookRepository.findByPatientsId(patients.getId());
+        medicalRecordBook.setBhyt(request.getBhyt());
+        medicalRecordBook.setAddress(request.getAddress());
+        medicalRecordBook.setFullName(request.getFullName());
+        medicalRecordBook.setPhone(request.getPhone());
+        medicalRecordBook.setGender(request.isGender());
+        medicalRecordBook.setDob(request.getDob());
         medicalRecordBookRepository.save(medicalRecordBook);
         return medicalRecordBookMapper.toMedicalRecordBookResponse(medicalRecordBook);
     }
@@ -117,6 +124,7 @@ public class PatientService {
         }
         return medicalRecordBookMapper.toMedicalRecordBookResponses(medicalRecordBooks);
     }
+    @PreAuthorize("hasRole('USER')")
     public MedicalRecordBookResponse getMedicalRecordBook() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Patients patients = patientRepository.findByEmail(email).orElse(null);
@@ -130,6 +138,7 @@ public class PatientService {
         return medicalRecordBookMapper.toMedicalRecordBookResponse(medicalRecordBook);
 
     }
+    @PreAuthorize("hasRole('USER')")
     public MedicalRecordBookResponse updateMedicalRecordBook(MedicalRecordBookRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Patients patients = patientRepository.findByEmail(email).orElse(null);
@@ -163,6 +172,7 @@ public class PatientService {
         medicalHistory.setMedicalRecordBook(medicalRecordBook);
         return medicalHistoryMapper.toMedicalHistoryResponse(medicalHistory);
     }
+    @PreAuthorize("hasRole('USER')")
     public List<MedicalHistoryResponse> getMedicalHistory() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Patients patients = patientRepository.findByEmail(email).orElse(null);

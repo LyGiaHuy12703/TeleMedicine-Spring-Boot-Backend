@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import org.telemedicine.server.dto.api.ApiResponse;
 import org.telemedicine.server.dto.specialties.SpecialtiesRequest;
 import org.telemedicine.server.dto.specialties.SpecialtiesResponse;
-import org.telemedicine.server.dto.staff.StaffResponse;
 import org.telemedicine.server.service.SpecialtiesService;
 
 import java.util.List;
@@ -30,11 +29,22 @@ public class SpecialtiesController {
     }
 
     @GetMapping
-    ApiResponse<Object> getSpecialties() {
-        return ApiResponse.builder()
-                .code("drugs-s-01")
+    ResponseEntity<ApiResponse<List<SpecialtiesResponse>>> getSpecialties() {
+        ApiResponse<List<SpecialtiesResponse>> apiResponse = ApiResponse.<List<SpecialtiesResponse>>builder()
+                .message("get all Specialties success  " )
+                .code("specialties-s-02")
                 .data(specialtiesService.getAllSpecialties())
                 .build();
+        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
+    }
+    @GetMapping("/medicalStaffs")
+    ResponseEntity<ApiResponse<List<SpecialtiesResponse>>> getSpecialtiesWithMedicalStaffs() {
+        ApiResponse<List<SpecialtiesResponse>> apiResponse = ApiResponse.<List<SpecialtiesResponse>>builder()
+                .message("get all Specialties success  " )
+                .code("specialties-s-02")
+                .data(specialtiesService.getSpecialtiesWithMedicalStaffs())
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<SpecialtiesResponse>> getSpecialtiesById(@PathVariable("id") String id) {

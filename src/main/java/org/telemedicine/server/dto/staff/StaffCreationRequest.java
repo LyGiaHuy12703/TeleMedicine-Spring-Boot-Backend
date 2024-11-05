@@ -5,6 +5,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -33,10 +34,9 @@ public class StaffCreationRequest {
     LocalDate startDate;
     @NotBlank(message = "Practicing certificate is required")
     String practicingCertificate;
-    @NotBlank(message = "Department is required")
-    String department;
-    @NotBlank(message = "Specialties ID is required")
-    String specialtiesId;
+    List<String> specialtiesId;
     @NotEmpty(message = "At least one role is required")
     Set<String> roles;
+    Set<String> hocHam;
+    Set<String> hocVi;
 }

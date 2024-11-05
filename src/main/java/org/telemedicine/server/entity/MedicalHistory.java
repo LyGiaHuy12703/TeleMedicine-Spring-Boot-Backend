@@ -19,12 +19,11 @@ public class MedicalHistory {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @NotBlank(message = "Medical history info is required")
     @Column(length = 500) // Set a reasonable length for medical history information
     String medicalHistoryInfo;
 
-    @NotNull(message = "Date is required")
     LocalDate date;
+
 
     @ManyToOne
     @JoinColumn(name = "medicalRecord_id")

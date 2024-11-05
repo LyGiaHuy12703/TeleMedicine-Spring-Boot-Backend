@@ -5,7 +5,6 @@ import org.springframework.stereotype.Repository;
 import org.telemedicine.server.entity.Medicine;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface MedicineRepository extends JpaRepository<Medicine, String> {

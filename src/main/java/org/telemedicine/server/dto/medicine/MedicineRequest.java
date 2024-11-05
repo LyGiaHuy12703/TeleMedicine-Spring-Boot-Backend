@@ -2,7 +2,6 @@ package org.telemedicine.server.dto.medicine;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.telemedicine.server.entity.Drug;
 
 @Data
 @AllArgsConstructor

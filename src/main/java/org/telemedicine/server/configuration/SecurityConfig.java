@@ -41,12 +41,20 @@ public class SecurityConfig {
             "auth/signInUser",
             "auth/signInStaff",
             "auth/introspect",
-//            "auth/logout",
             "auth/refreshToken",
-            "drugs"
+            "drugs",
     } ;
+    private final String[] PUBLIC_GET_ENDPOINTS = {
+            "specialties",
+            "specialties/medicalStaffs",
+            "drugs",
+            "service/**",
+            "staff/**",
+            "staff/roles",
+            "auth/test",
+            "auth/register/verify/**"
+    };
 
-    CustomJwtDecoder customJwtDecoder;
 
     //cấu hình spring security những endpoint nào cần bảo vệ và k cần
     @Bean
@@ -54,7 +62,7 @@ public class SecurityConfig {
         //cấu hình những đường dẫn guest có thể đi vào
         httpSecurity.authorizeHttpRequests(request ->
                 request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
-                        .requestMatchers(HttpMethod.GET, "auth/verify/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                         .anyRequest().authenticated());
 
         httpSecurity.oauth2ResourceServer(oauth2 ->

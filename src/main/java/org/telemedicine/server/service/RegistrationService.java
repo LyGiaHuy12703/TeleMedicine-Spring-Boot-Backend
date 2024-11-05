@@ -2,6 +2,7 @@ package org.telemedicine.server.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.telemedicine.server.dto.registration.RegistrationRequest;
@@ -26,6 +27,7 @@ public class RegistrationService {
     @Autowired
     private RegistrationMapper registrationMapper;
 
+    @PreAuthorize("hasRole('USER')")
     public RegistrationResponse createRegistration() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Patients patient = patientRepository.findByEmail(email)
@@ -52,12 +54,13 @@ public class RegistrationService {
 
         return registrationMapper.toRegistrationResponse(registrationRepository.save(registration));
     }
+    @PreAuthorize("hasRole('USER')")
     public RegistrationResponse getRegistrationById(){
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Patients patient = patientRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "User not found", "patient-e-01"));
 
-        Registration registration = registrationRepository.findByPatientsId(patient.getId());
+        Registration registration = registrationRepository.findFirstByPatientsIdAndDateDesc(patient.getId()).orElse(null);
         if(registration == null){
             throw new AppException(HttpStatus.NOT_FOUND, "User not found", "patient-e-01");
         }

@@ -19,10 +19,8 @@ public class Registration {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @NotNull(message = "Order number is required")
     int orderNumber;
 
-    @NotNull(message = "Date is required")
     LocalDate date;
 
     @ManyToOne

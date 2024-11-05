@@ -19,9 +19,7 @@ public class TokenRefresh {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
     @Column(length = 500)
-    @NotBlank(message = "Token is required")
     String token;
-    @NotNull(message = "Creation date is required")
     @Column(length = 500)
     String refreshToken;
     Date createAt;

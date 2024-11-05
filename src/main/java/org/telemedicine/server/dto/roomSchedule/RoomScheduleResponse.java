@@ -18,5 +18,5 @@ public class RoomScheduleResponse {
     String id;
     LocalDate date;
     Clinic clinic;
-    MedicalStaff staff;
+    MedicalStaff medicalStaff;
 }

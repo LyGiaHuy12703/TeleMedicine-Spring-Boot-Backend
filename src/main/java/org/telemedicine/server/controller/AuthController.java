@@ -8,27 +8,50 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.telemedicine.server.core.ResponseSuccess;
 import org.telemedicine.server.dto.api.ApiResponse;
 import org.telemedicine.server.dto.auth.*;
 import org.telemedicine.server.dto.patients.PatientCreationRequest;
+import org.telemedicine.server.entity.MedicalStaff;
+import org.telemedicine.server.enums.Role;
 import org.telemedicine.server.exception.AppException;
+import org.telemedicine.server.repository.MedicalStaffRepository;
 import org.telemedicine.server.service.AuthService;
+import org.telemedicine.server.service.MailService;
+import org.telemedicine.server.utils.CodeUtil;
 
 import java.net.URI;
 import java.text.ParseException;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
     @Autowired
     private AuthService authService;
+    @Autowired
+    private CodeUtil codeUtil;
+    @Autowired
+    private MailService mailService;
+    @Autowired
+    private MedicalStaffRepository medicalStaffRepository;
 
+    @GetMapping("/test")
+    String test() {
+        MedicalStaff staff = medicalStaffRepository.findByEmail("admin@email.com")
+                .orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "not found"));
+        return staff.getRoles().toString();
+    }
 
     //Đăng ký cho user
     @PostMapping("/register")
     ResponseEntity<ApiResponse<Void>> signup(@RequestBody @Valid PatientCreationRequest request) throws MessagingException {
-        authService.signUp(request);
+        authService.register(request);
+        String verificationCode = UUID.randomUUID().toString();
+        codeUtil.save(verificationCode, request, 1);
+        mailService.sendEmailToVerifyRegister(request.getEmail(), verificationCode);
         ApiResponse<Void> apiResponse = ApiResponse.<Void>builder()
                 .code("auth-s-01")
                 .message("Request register successfully, check your email")
@@ -36,19 +59,17 @@ public class AuthController {
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
     //xac nhan email user
-    @GetMapping("/verify/{token}")
-    ResponseEntity<Void> verifyUser(@PathVariable("token") String token) {
-        boolean verified = authService.verifyUser(token);
-
-        if (verified) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setLocation(URI.create("http://localhost:3000/auth/verification-success"));
-            return new ResponseEntity<>(headers, HttpStatus.FOUND);
-        } else {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setLocation(URI.create("http://localhost:3000/auth/verification-failed"));
-            return new ResponseEntity<>(headers, HttpStatus.FOUND);
-        }
+    @GetMapping("/register/verify/{verificationCode}")
+    public RedirectView verifyRegister(@PathVariable String verificationCode) {
+        PatientCreationRequest request = (PatientCreationRequest) codeUtil.get(verificationCode);
+        AuthResponse authResponse = authService.verifyRegister(request);
+        codeUtil.remove(verificationCode);
+        mailService.sendEmailToWelcome(request.getEmail());
+        String redirectUrl = UriComponentsBuilder.fromUriString("http://localhost:3000/auth/verification-success")
+                .queryParam("accessToken",  authResponse.getAccessToken())
+                .queryParam("refreshToken", authResponse.getRefreshToken())
+                .toUriString();
+        return new RedirectView(redirectUrl);
     }
     //đăng nhập cho user
     @PostMapping("/signInUser")
@@ -67,7 +88,6 @@ public class AuthController {
     @PostMapping("/signInStaff")
     ResponseEntity<ApiResponse<AuthResponse>> loginStaff(@RequestBody AuthRequest request) {
         var result = authService.loginStaff(request);
-
         ApiResponse<AuthResponse> apiResponse = ApiResponse.<AuthResponse>builder()
                 .data(result)
                 .code("auth-s-02")
@@ -75,14 +95,6 @@ public class AuthController {
                 .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
-    }
-    @PostMapping("/introspect")
-    ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request)
-            throws ParseException, JOSEException {
-        var result = authService.introspect(request);
-        return ApiResponse.<IntrospectResponse>builder()
-                .data(result)
-                .build();
     }
     @PostMapping("/refreshToken")
     public ResponseSuccess refreshToken(@RequestBody RefreshRequest request) throws ParseException, JOSEException {

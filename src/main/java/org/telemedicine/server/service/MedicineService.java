@@ -1,5 +1,6 @@
 package org.telemedicine.server.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -8,15 +9,16 @@ import org.telemedicine.server.dto.medicine.MedicineRequest;
 import org.telemedicine.server.dto.medicine.MedicineResponse;
 import org.telemedicine.server.entity.Drug;
 import org.telemedicine.server.entity.Medicine;
-import org.telemedicine.server.entity.PrescriptionMedicine;
+//import org.telemedicine.server.entity.PrescriptionMedicine;
 import org.telemedicine.server.exception.AppException;
 import org.telemedicine.server.mapper.MedicineMapper;
 import org.telemedicine.server.repository.DrugsRepository;
 import org.telemedicine.server.repository.MedicineRepository;
-import org.telemedicine.server.repository.PrescriptionMedicineRepository;
+//import org.telemedicine.server.repository.PrescriptionMedicineRepository;
 
 import java.util.List;
 
+@Slf4j
 @Service
 public class MedicineService {
     @Autowired
@@ -25,29 +27,33 @@ public class MedicineService {
     private MedicineMapper medicineMapper;
     @Autowired
     private DrugsRepository drugsRepository;
-    @Autowired
-    private PrescriptionMedicineRepository prescriptionMedicineRepository;
+//    @Autowired
+//    private PrescriptionMedicineRepository prescriptionMedicineRepository;
 
     @PreAuthorize("hasRole('ADMIN')")
-    public MedicineResponse addMedicine(MedicineRequest medicineRequest) {
-        if(medicineRepository.existsByName(medicineRequest.getName())) {
+    public MedicineResponse addMedicine(MedicineRequest request) {
+        if(medicineRepository.existsByName(request.getName())) {
             throw new AppException(HttpStatus.BAD_REQUEST, "Medicine already exists", "medicine-e-01");
         }
         Medicine medicine = Medicine.builder()
-                .name(medicineRequest.getName())
-                .chiDinh(medicineRequest.getChiDinh())
-                .chongChiDinh(medicineRequest.getChongChiDinh())
-                .chuYKhiSUDung(medicineRequest.getChuYKhiSUDung())
-                .dangBaoChe(medicineRequest.getDangBaoChe())
-                .lieu_cachDung(medicineRequest.getLieu_cachDung())
-                .nhomThuoc_tacDung(medicineRequest.getNhomThuoc_tacDung())
-                .tacDungKMongMuon(medicineRequest.getTacDungKMongMuon())
-                .taiLieuThamKhao(medicineRequest.getTaiLieuThamKhao())
-                .thanTrong(medicineRequest.getThanTrong())
+                .name(request.getName())
+                .chiDinh(request.getChiDinh())
+                .chongChiDinh(request.getChongChiDinh())
+                .chuYKhiSUDung(request.getChuYKhiSUDung())
+                .dangBaoChe(request.getDangBaoChe())
+                .lieu_cachDung(request.getLieu_cachDung())
+                .nhomThuoc_tacDung(request.getNhomThuoc_tacDung())
+                .tacDungKMongMuon(request.getTacDungKMongMuon())
+                .taiLieuThamKhao(request.getTaiLieuThamKhao())
+                .thanTrong(request.getThanTrong())
                 .build();
-        Drug drug = drugsRepository.findById(medicineRequest.getDrug())
+        log.info("tới đây 1");
+        Drug drug = drugsRepository.findById(request.getDrug())
                 .orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "Drug not found", "medicine-e-02"));
+        log.info("tới đây 2");
         medicine.setDrug(drug);
+        log.info("tới đây 3");
+
         return medicineMapper.toMedicineResponse(medicineRepository.save(medicine));
     }
     public List<MedicineResponse> getAllMedicinesByDrugId(String id) {
@@ -85,10 +91,10 @@ public class MedicineService {
     public void deleteMedicine(String id) {
         Medicine medicine = medicineRepository.findById(id)
                 .orElseThrow(()-> new AppException(HttpStatus.BAD_REQUEST, "Medicine not found", "medicine-e-06"));
-        List<PrescriptionMedicine> prescriptionMedicines = prescriptionMedicineRepository.findByMedicine(medicine);
-        if(!prescriptionMedicines.isEmpty()) {
-            throw new AppException(HttpStatus.BAD_REQUEST, "Không thể xóa thuốc này", "medicine-e-07");
-        }
+//        List<PrescriptionMedicine> prescriptionMedicines = prescriptionMedicineRepository.findByMedicine(medicine);
+//        if(!prescriptionMedicines.isEmpty()) {
+//            throw new AppException(HttpStatus.BAD_REQUEST, "Không thể xóa thuốc này", "medicine-e-07");
+//        }
         medicineRepository.delete(medicine);
     }
 }

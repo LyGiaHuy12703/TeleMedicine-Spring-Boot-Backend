@@ -64,7 +64,7 @@ public class ClinicService {
     }
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteClinicById(String id) {
-        if(clinicRepository.existsById(id)) {
+        if(!clinicRepository.existsById(id)) {
             throw new AppException(HttpStatus.BAD_REQUEST, "Clinic not found", "clinic-e-04");
         }
 

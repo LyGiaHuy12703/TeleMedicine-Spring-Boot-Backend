@@ -21,7 +21,6 @@ public class Prescription {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @NotBlank(message = "Benh is required")
     String benh;
 
     @ManyToOne
@@ -29,7 +28,6 @@ public class Prescription {
     @JsonBackReference
     Examination examination;
 
-    @OneToMany(mappedBy = "prescription", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    List<PrescriptionMedicine> prescriptionMedicines = new ArrayList<>();
+    @ManyToMany(mappedBy = "prescriptions")
+    List<Medicine> medicines = new ArrayList<>();
 }
