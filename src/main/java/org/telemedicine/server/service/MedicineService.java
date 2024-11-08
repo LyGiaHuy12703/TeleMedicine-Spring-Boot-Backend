@@ -17,6 +17,7 @@ import org.telemedicine.server.repository.MedicineRepository;
 //import org.telemedicine.server.repository.PrescriptionMedicineRepository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -27,8 +28,6 @@ public class MedicineService {
     private MedicineMapper medicineMapper;
     @Autowired
     private DrugsRepository drugsRepository;
-//    @Autowired
-//    private PrescriptionMedicineRepository prescriptionMedicineRepository;
 
     @PreAuthorize("hasRole('ADMIN')")
     public MedicineResponse addMedicine(MedicineRequest request) {
@@ -47,20 +46,14 @@ public class MedicineService {
                 .taiLieuThamKhao(request.getTaiLieuThamKhao())
                 .thanTrong(request.getThanTrong())
                 .build();
-        log.info("tới đây 1");
         Drug drug = drugsRepository.findById(request.getDrug())
                 .orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "Drug not found", "medicine-e-02"));
-        log.info("tới đây 2");
         medicine.setDrug(drug);
-        log.info("tới đây 3");
 
         return medicineMapper.toMedicineResponse(medicineRepository.save(medicine));
     }
-    public List<MedicineResponse> getAllMedicinesByDrugId(String id) {
-        drugsRepository.findById(id)
-                .orElseThrow(() -> new AppException(HttpStatus.BAD_REQUEST, "Drug not found", "medicine-e-03"));
-        return medicineMapper.toMedicineResponseList(medicineRepository.findByDrugId(id));
-    }
+
+
     public MedicineResponse getMedicineById(String id) {
         Medicine medicine = medicineRepository.findById(id)
                 .orElseThrow(()-> new AppException(HttpStatus.BAD_REQUEST, "Medicine not found", "medicine-e-04"));
@@ -96,5 +89,11 @@ public class MedicineService {
 //            throw new AppException(HttpStatus.BAD_REQUEST, "Không thể xóa thuốc này", "medicine-e-07");
 //        }
         medicineRepository.delete(medicine);
+    }
+
+    public List<MedicineResponse> getAllMedicinesByDrugId(String id) {
+        Drug drug = drugsRepository.findById(id).orElseThrow(()->new AppException(HttpStatus.NOT_FOUND, "drugs not found", "medicine-e-07"));
+        List<Medicine> medicines = medicineRepository.findByDrug(drug);
+        return medicineMapper.toMedicineResponseList(medicines);
     }
 }

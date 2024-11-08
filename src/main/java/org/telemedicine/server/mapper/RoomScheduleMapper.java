@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.telemedicine.server.dto.roomSchedule.RoomScheduleResponse;
 import org.telemedicine.server.entity.RoomSchedule;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Mapper(componentModel = "spring")

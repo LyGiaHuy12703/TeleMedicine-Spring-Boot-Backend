@@ -1,6 +1,7 @@
 package org.telemedicine.server.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -45,4 +46,8 @@ public class MedicalSchedule {
     @JoinColumn(name = "patient_id")
     @JsonBackReference
     Patients patients;
-}
+
+    @OneToOne(mappedBy = "medicalSchedule")
+    @JsonManagedReference
+    Examination examination
+            ;}

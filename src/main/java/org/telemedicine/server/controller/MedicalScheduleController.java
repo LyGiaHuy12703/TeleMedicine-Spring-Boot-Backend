@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.*;
 import org.telemedicine.server.dto.api.ApiResponse;
 import org.telemedicine.server.dto.medicalSchedule.MedicalScheduleRequest;
 import org.telemedicine.server.dto.medicalSchedule.MedicalScheduleResponse;
+import org.telemedicine.server.enums.StatusSchedule;
 import org.telemedicine.server.service.MedicalScheduleService;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 
 @RestController
@@ -32,22 +34,53 @@ public class MedicalScheduleController {
     //lay lich hen cua ban than
     @GetMapping
     ResponseEntity<ApiResponse<List<MedicalScheduleResponse>>> getYourMedicalSchedules() {
+        // Sắp xếp danh sách theo ngày và giờ
+        List<MedicalScheduleResponse> schedules = medicalScheduleService.getMyMedicalSchedules();
+        schedules.sort(Comparator.comparing(MedicalScheduleResponse::getAppointmentDate)
+                .thenComparing(MedicalScheduleResponse::getAppointmentTime));
         ApiResponse<List<MedicalScheduleResponse>> apiResponse = ApiResponse.<List<MedicalScheduleResponse>>builder()
                 .code("MedicalSchedule-s-02")
                 .message("get all your Medical Schedule successful")
-                .data(medicalScheduleService.getMyMedicalSchedules())
+                .data(schedules)
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
-    //lay tat ca lich hen
+    //lay tat ca lich hen theo status
     @GetMapping("/all")
-    ResponseEntity<ApiResponse<List<MedicalScheduleResponse>>> getAllMedicalSchedules() {
+    ResponseEntity<ApiResponse<List<MedicalScheduleResponse>>> getAllMedicalSchedulesByStatus(@RequestParam String status) {
+        StatusSchedule statusSchedule;
+        try {
+            statusSchedule = StatusSchedule.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(ApiResponse.<List<MedicalScheduleResponse>>builder()
+                            .code("MedicalSchedule-e-01")
+                            .message("Invalid status: " + status)
+                            .build());
+        }
+
+        List<MedicalScheduleResponse> schedules = medicalScheduleService.getMedicalSchedulesByStatus(statusSchedule);
+        schedules.sort(Comparator.comparing(MedicalScheduleResponse::getAppointmentDate)
+                .thenComparing(MedicalScheduleResponse::getAppointmentTime)
+                .thenComparing(MedicalScheduleResponse::getOrderNumber));
+
         ApiResponse<List<MedicalScheduleResponse>> apiResponse = ApiResponse.<List<MedicalScheduleResponse>>builder()
-                .code("MedicalSchedule-s-03")
-                .message("get all Medical Schedule successful")
-                .data(medicalScheduleService.getAllMedicalSchedules())
+                .code("MedicalSchedule-s-04")
+                .message("Get Medical Schedules by status successful")
+                .data(schedules)
                 .build();
-        return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
+
+        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
+    }
+    //lay lich hen hôm nay
+    @GetMapping("/today")
+    ResponseEntity<ApiResponse<List<MedicalScheduleResponse>>> getTodayMedicalSchedules() {
+        ApiResponse<List<MedicalScheduleResponse>> apiResponse = ApiResponse.<List<MedicalScheduleResponse>>builder()
+                .code("MedicalSchedule-s-04")
+                .message("get all your Medical Schedule today successful")
+                .data(medicalScheduleService.getByToday())
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
     //lay lich hen theo ngay
     @GetMapping("/byDate")
@@ -83,6 +116,7 @@ public class MedicalScheduleController {
 //                .build();
 //        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
 //    }
+
     //cap nhat status lich hen
     @PutMapping("{id}")
     ResponseEntity<ApiResponse<MedicalScheduleResponse>> updateMedicalSchedule(@PathVariable("id") String id, @RequestBody String status) {

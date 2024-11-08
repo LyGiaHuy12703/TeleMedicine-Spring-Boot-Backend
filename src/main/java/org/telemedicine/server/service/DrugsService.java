@@ -54,9 +54,9 @@ public class DrugsService {
     }
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteDrugById(String id) {
-        drugsRepository.findById(id)
+        Drug drug = drugsRepository.findById(id)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Drug not found", "Drug-e-02"));
-        List<Medicine> medicines = medicineRepository.findByDrugId(id);
+        List<Medicine> medicines = medicineRepository.findByDrug(drug);
         if(!medicines.isEmpty()){
             throw new AppException(HttpStatus.BAD_REQUEST,"Không thể xoá loại thuốc ", "drug-e-03");
         }

@@ -1,21 +1,17 @@
 package org.telemedicine.server.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.telemedicine.server.dto.examination.ExaminationRequest;
 import org.telemedicine.server.dto.examination.ExaminationResponse;
-import org.telemedicine.server.entity.Clinic;
-import org.telemedicine.server.entity.Examination;
-import org.telemedicine.server.entity.Patients;
-import org.telemedicine.server.entity.ServiceEntity;
+import org.telemedicine.server.entity.*;
+import org.telemedicine.server.enums.StatusSchedule;
 import org.telemedicine.server.exception.AppException;
 import org.telemedicine.server.mapper.ExaminationMapper;
-import org.telemedicine.server.repository.ClinicRepository;
-import org.telemedicine.server.repository.ExaminationRepository;
-import org.telemedicine.server.repository.PatientRepository;
-import org.telemedicine.server.repository.ServiceRepository;
+import org.telemedicine.server.repository.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -32,7 +28,10 @@ public class ExaminationService {
     private ServiceRepository serviceRepository;
     @Autowired
     private ExaminationMapper examinationMapper;
+    @Autowired
+    private MedicalScheduleRepository medicalScheduleRepository;
 
+    @Transactional
     @PreAuthorize("hasRole('ADMIN')")
     public ExaminationResponse create(ExaminationRequest examinationRequest) {
         Clinic clinic = clinicRepository.findById(examinationRequest.getClinicId())
@@ -41,20 +40,28 @@ public class ExaminationService {
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Patient not found", "exam-e-02"));
         ServiceEntity service = serviceRepository.findById(examinationRequest.getServiceId())
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Service not found", "exam-e-03"));
-        LocalDate date = LocalDate.now();
-        Examination examination = Examination.builder()
-                .clinic(clinic)
-                .serviceEntity(service)
-                .patients(patients)
-                .examinationDate(date)
-                .build();
+        MedicalSchedule medicalSchedule = medicalScheduleRepository.findById(examinationRequest.getMedicalScheduleId())
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Medical schedule not found", "exam-e-04"));
+
+        Examination examination = examinationRepository.findByMedicalSchedule(medicalSchedule);
+        examination.setClinic(clinic);
+        examination.setPatients(patients);
+        examination.setServiceEntity(service);
+        examination.setExaminationDate(LocalDate.now());
+
         return examinationMapper.toExaminationResponse(examinationRepository.save(examination));
     }
     @PreAuthorize("hasRole('ADMIN')")
-    public List<ExaminationResponse> getAllByClinic(String clinicId) {
+    public List<ExaminationResponse> getAllByClinic(String clinicId, String statusString) {
         Clinic clinic = clinicRepository.findById(clinicId)
                 .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Clinic not found", "exam-e-04"));
-        List<Examination> examinations = examinationRepository.findAllByClinic(clinic);
+        StatusSchedule status = null;
+        try {
+            status = StatusSchedule.valueOf(statusString);  // Chuyển đổi từ String sang enum
+        } catch (IllegalArgumentException e) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "Invalid status value", "exam-e-05");
+        }
+        List<Examination> examinations = examinationRepository.findAllByClinicAndMedicalScheduleStatus(clinic, status);
         return examinationMapper.toExaminationResponses(examinations);
     }
     @PreAuthorize("hasRole('ADMIN')")

@@ -10,7 +10,7 @@ import org.telemedicine.server.entity.Drug;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MedicineResponse {
-    Long id;
+    String id;
     String name;
     String dangBaoChe;
     String nhomThuoc_tacDung;

@@ -28,11 +28,14 @@ public class ClinicController {
         return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
     @GetMapping
-    ResponseEntity<ApiResponse<List<ClinicResponse>>> getClinics() {
+    ResponseEntity<ApiResponse<List<ClinicResponse>>> getClinics(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "100") int size
+    ) {
         ApiResponse<List<ClinicResponse>> apiResponse = ApiResponse.<List<ClinicResponse>>builder()
                 .code("Clinic-s-02")
                 .message("Clinic get by id successful")
-                .data(clinicService.getAllClinic())
+                .data(clinicService.getAllClinic(page, size))
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }

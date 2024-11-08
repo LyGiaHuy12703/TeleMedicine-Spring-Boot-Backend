@@ -25,5 +25,6 @@ public interface RoomScheduleRepository extends JpaRepository<RoomSchedule, Stri
     int countByDateAndClinic(@Param("date") LocalDate date, @Param("clinic") Clinic clinic);
     @Query("SELECT COUNT(rs) > 0 FROM RoomSchedule rs WHERE rs.date = :date AND rs.medicalStaff = :staff")
     boolean existsByDateAndMedicalStaff(@Param("date") LocalDate date, @Param("staff") MedicalStaff staff);
+    List<RoomSchedule> findByMedicalStaffAndDate(MedicalStaff medicalStaff, LocalDate date);
 
 }

@@ -13,4 +13,5 @@ public class ExaminationRequest {
     String clinicId;
     String patientId;
     String serviceId;
+    String medicalScheduleId;
 }

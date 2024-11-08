@@ -170,6 +170,7 @@ public class PatientService {
         MedicalHistory medicalHistory = medicalHistoryMapper.toMedicalHistory(request);
         medicalHistory.setDate(date);
         medicalHistory.setMedicalRecordBook(medicalRecordBook);
+        medicalHistoryRepository.save(medicalHistory);
         return medicalHistoryMapper.toMedicalHistoryResponse(medicalHistory);
     }
     @PreAuthorize("hasRole('USER')")

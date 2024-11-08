@@ -1,6 +1,5 @@
 package org.telemedicine.server.controller;
 
-import com.cloudinary.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -39,8 +38,21 @@ public class RoomScheduleController {
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
+//get theo mã bác sĩ và ngày
+    @GetMapping("/byStaffAndDate")
+    ResponseEntity<ApiResponse<List<RoomScheduleResponse>>> findByMedicalStaffAndDate(
+            @RequestParam("medicalStaffId") String medicalStaffId,
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        ApiResponse<List<RoomScheduleResponse>> apiResponse = ApiResponse.<List<RoomScheduleResponse>>builder()
+                .code("roomSchedule-s-07")
+                .message("Get room schedules by medical staff and date")
+                .data(roomScheduleService.getByMedicalStaffAndDate(medicalStaffId, date))
+                .build();
+        return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
+    }
 
-//    gettheo ngay
+
+    //    gettheo ngay
     @GetMapping("/byDate")
     ResponseEntity<ApiResponse<List<RoomScheduleResponse>>> findByDate(
             @RequestParam("date")

@@ -1,5 +1,6 @@
 package org.telemedicine.server.service;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -7,12 +8,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.telemedicine.server.dto.medicalSchedule.MedicalScheduleRequest;
 import org.telemedicine.server.dto.medicalSchedule.MedicalScheduleResponse;
+import org.telemedicine.server.entity.Examination;
 import org.telemedicine.server.entity.MedicalSchedule;
 import org.telemedicine.server.entity.MedicalStaff;
 import org.telemedicine.server.entity.Patients;
 import org.telemedicine.server.enums.StatusSchedule;
 import org.telemedicine.server.exception.AppException;
 import org.telemedicine.server.mapper.MedicalScheduleMapper;
+import org.telemedicine.server.repository.ExaminationRepository;
 import org.telemedicine.server.repository.MedicalScheduleRepository;
 import org.telemedicine.server.repository.MedicalStaffRepository;
 import org.telemedicine.server.repository.PatientRepository;
@@ -30,7 +33,10 @@ public class MedicalScheduleService {
     private MedicalStaffRepository medicalStaffRepository;
     @Autowired
     private MedicalScheduleMapper medicalScheduleMapper;
+    @Autowired
+    private ExaminationRepository examinationRepository;
 
+    @Transactional
     public MedicalScheduleResponse createMedicalSchedule(MedicalScheduleRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Patients patients = patientRepository.findByEmail(email).orElse(null);
@@ -41,6 +47,13 @@ public class MedicalScheduleService {
         if (staff == null) {
             throw new AppException(HttpStatus.NOT_FOUND, "Staff not found", "medicalSchedule-e-02");
         }
+        // Check if a schedule exists for the same patient on the same date and time
+        boolean isScheduleExists = medicalScheduleRepository.existsByPatientsAndAppointmentDateAndAppointmentTime(
+                patients, request.getAppointmentDate(), request.getAppointmentTime());
+        if (isScheduleExists) {
+            throw new AppException(HttpStatus.BAD_REQUEST, "Bạn có lịch vào ngày giờ này rồi", "medicalSchedule-e-03");
+        }
+
         List<MedicalSchedule> todaySchedule = medicalScheduleRepository.findByAppointmentDate(LocalDate.now());
         int orderNumber;
         if(todaySchedule.isEmpty()) {
@@ -64,7 +77,14 @@ public class MedicalScheduleService {
                 .patients(patients)
                 .build();
 
-        return medicalScheduleMapper.toMedicalScheduleResponse(medicalScheduleRepository.save(medicalSchedule));
+        medicalSchedule = medicalScheduleRepository.save(medicalSchedule);
+        // Create and save examination using builder
+        Examination examination = Examination.builder()
+                .medicalSchedule(medicalSchedule)
+                .build();
+        examinationRepository.save(examination);
+
+        return medicalScheduleMapper.toMedicalScheduleResponse(medicalSchedule);
     }
     public List<MedicalScheduleResponse> getMyMedicalSchedules() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -85,8 +105,9 @@ public class MedicalScheduleService {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    public List<MedicalScheduleResponse> getAllMedicalSchedules() {
-        return medicalScheduleMapper.toMedicalScheduleResponses(medicalScheduleRepository.findAll());
+    public List<MedicalScheduleResponse> getMedicalSchedulesByStatus(StatusSchedule statusSchedule) {
+        List<MedicalSchedule> schedules = medicalScheduleRepository.findByStatus(statusSchedule);
+        return medicalScheduleMapper.toMedicalScheduleResponses(schedules);
     }
 
 
@@ -99,5 +120,14 @@ public class MedicalScheduleService {
         StatusSchedule statusSchedule = StatusSchedule.valueOf(status);
         medicalSchedule.setStatus(statusSchedule);
         return medicalScheduleMapper.toMedicalScheduleResponse(medicalScheduleRepository.save(medicalSchedule));
+    }
+
+    @PreAuthorize("hasRole('USER')")
+    public List<MedicalScheduleResponse> getByToday() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        Patients patients = patientRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(HttpStatus.NOT_FOUND, "Patient not found", "error-01"));
+        List<MedicalSchedule> medicalSchedules = medicalScheduleRepository.findByAppointmentDateAndPatients(LocalDate.now(), patients);
+        return medicalScheduleMapper.toMedicalScheduleResponses(medicalSchedules);
     }
 }

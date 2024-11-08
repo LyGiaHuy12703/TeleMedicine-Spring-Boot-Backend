@@ -2,10 +2,8 @@ package org.telemedicine.server.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import org.telemedicine.server.entity.Clinic;
-import org.telemedicine.server.entity.Examination;
-import org.telemedicine.server.entity.Patients;
-import org.telemedicine.server.entity.ServiceEntity;
+import org.telemedicine.server.entity.*;
+import org.telemedicine.server.enums.StatusSchedule;
 
 import java.util.List;
 
@@ -15,5 +13,8 @@ public interface ExaminationRepository extends JpaRepository<Examination, String
     List<Examination> findAllByClinic(Clinic clinic);
     List<Examination> findAllByServiceEntity(ServiceEntity serviceEntity);
     List<Examination> findAllByPatients(Patients patients);
+    Examination findByMedicalSchedule(MedicalSchedule medicalSchedule);
+    List<Examination> findAllByClinicAndMedicalScheduleStatus(Clinic clinic, StatusSchedule status);
+
 
 }

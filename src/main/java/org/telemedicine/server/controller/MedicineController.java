@@ -1,5 +1,6 @@
 package org.telemedicine.server.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,7 @@ import org.telemedicine.server.service.MedicineService;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/medicine")
 public class MedicineController {
@@ -25,8 +27,9 @@ public class MedicineController {
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }
-    @GetMapping("drugs/{id}")
+    @GetMapping("/drugs/{id}")
     ResponseEntity<ApiResponse<List<MedicineResponse>>> getAllMedicinesByDrugId(@PathVariable("id") String id) {
+        log.info("Received ID: {}", id);  // Log id nhận được
         ApiResponse<List<MedicineResponse>> apiResponse = ApiResponse.<List<MedicineResponse>>builder()
                 .message("medicine with drug id " + id)
                 .code("medicine-s-02")

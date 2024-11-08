@@ -1,5 +1,6 @@
 package org.telemedicine.server.dto.medicalSchedule;
 
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,11 +17,13 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MedicalScheduleResponse {
+    String id;
     LocalDate appointmentDate;
     Time appointmentTime;
-    LocalDate appointmentCreateDateTime;
+    LocalDate appointmentCreateDate;
     String status;
     int orderNumber;
     MedicalStaff medicalStaff;
     Patients patients;
+    String lyDoKham;
 }

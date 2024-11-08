@@ -1,6 +1,9 @@
 package org.telemedicine.server.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -41,8 +44,10 @@ public class ClinicService {
         return clinicMapper.toClinicResponse(clinic);
     }
     @PreAuthorize("hasRole('ADMIN')")
-    public List<ClinicResponse> getAllClinic() {
-        List<Clinic> clinics = clinicRepository.findAll();
+    public List<ClinicResponse> getAllClinic(int page, int size) {
+        Pageable pageable = PageRequest.of(page,size);
+
+        Page<Clinic> clinics = clinicRepository.findAll(pageable);
         return clinicMapper.toClinicResponses(clinics);
     }
     @PreAuthorize("hasRole('ADMIN')")

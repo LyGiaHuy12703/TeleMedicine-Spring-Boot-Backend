@@ -149,4 +149,10 @@ public class RoomScheduleService {
         List<RoomSchedule> roomSchedules = roomScheduleRepository.findAll();
         return roomScheduleMapper.toRoomScheduleResponses(roomSchedules);
     }
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<RoomScheduleResponse> getByMedicalStaffAndDate(String medicalStaffId, LocalDate date) {
+        MedicalStaff medicalStaff = medicalStaffRepository.findById(medicalStaffId).orElseThrow(() ->new AppException(HttpStatus.NOT_FOUND, "Medical staff not found", "medicalStaff-00"));
+        List<RoomSchedule> roomSchedules = roomScheduleRepository.findByMedicalStaffAndDate(medicalStaff, date);
+        return roomScheduleMapper.toRoomScheduleResponses(roomSchedules);
+    }
 }

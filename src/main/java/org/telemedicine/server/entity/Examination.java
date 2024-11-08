@@ -43,4 +43,8 @@ public class Examination {
     @OneToMany(mappedBy = "examination", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     List<Prescription> prescriptions = new ArrayList<>();
+
+    @OneToOne @JoinColumn(name = "medical_schedule_id", nullable = false)
+    @JsonBackReference
+    MedicalSchedule medicalSchedule;
 }

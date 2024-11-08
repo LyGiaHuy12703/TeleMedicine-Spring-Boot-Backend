@@ -3,6 +3,8 @@ package org.telemedicine.server.dto.prescription;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -10,5 +12,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 public class PrescriptionRequest {
     String benh;
-    String examination;
+    String examinationId;
+    List<String> medicineIds;
 }

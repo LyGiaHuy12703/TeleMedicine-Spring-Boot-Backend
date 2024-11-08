@@ -28,11 +28,13 @@ public class ExaminationController {
     }
     //lay theo ma phong
     @GetMapping("/clinic")
-    ResponseEntity<ApiResponse<List<ExaminationResponse>>> getByClinicId(@RequestParam String clinicId) {
+    ResponseEntity<ApiResponse<List<ExaminationResponse>>> getByClinicId(
+            @RequestParam String clinicId,
+            @RequestParam(required = false) String status) {
         ApiResponse<List<ExaminationResponse>> apiResponse = ApiResponse.<List<ExaminationResponse>>builder()
                 .code("examination-s-02")
                 .message("examination get by clinic successful")
-                .data(examinationService.getAllByClinic(clinicId))
+                .data(examinationService.getAllByClinic(clinicId, status))
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(apiResponse);
     }

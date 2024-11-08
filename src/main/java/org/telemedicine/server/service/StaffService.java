@@ -5,6 +5,7 @@ import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +23,8 @@ import org.telemedicine.server.mapper.StaffMapper;
 import org.telemedicine.server.repository.MedicalStaffRepository;
 import org.telemedicine.server.repository.SpecialtiesRepository;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
@@ -134,11 +137,13 @@ public class StaffService {
         return null; // Trả về null nếu không tìm thấy
     }
 
-    public List<StaffResponse> getAll() {
-        List<MedicalStaff> allStaff = staffRepository.findAll();
+    public List<StaffResponse> getAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<MedicalStaff> allStaffPage = staffRepository.findAll(pageable);
 
         // Lọc ra những staff không có role là ADMIN
-        List<MedicalStaff> filteredStaff = allStaff.stream()
+        List<MedicalStaff> filteredStaff = allStaffPage.stream()
                 .filter(staff -> !staff.getRoles().contains ("ADMIN")) // Giả sử bạn có phương thức getRole() trong Staff
                 .collect(Collectors.toList());
 

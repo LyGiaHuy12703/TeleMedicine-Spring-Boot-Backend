@@ -36,9 +36,12 @@ public class StaffController {
     }
 
     @GetMapping
-    ResponseEntity<ApiResponse<List<StaffResponse>>> getAllStaff() {
+    ResponseEntity<ApiResponse<List<StaffResponse>>> getAllStaff(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size
+    ) {
         ApiResponse<List<StaffResponse>> apiResponse = ApiResponse.<List<StaffResponse>>builder()
-                .data(staffService.getAll())
+                .data(staffService.getAll(page,size))
                 .code("auth-s-02")
                 .message("Get staff successful")
                 .build();

@@ -18,7 +18,7 @@ public class PrescriptionController {
     private PrescriptionService prescriptionService;
 
     @PostMapping("/create")
-    ResponseEntity<ApiResponse<PrescriptionResponse>> create(PrescriptionRequest request){
+    ResponseEntity<ApiResponse<PrescriptionResponse>> create(@RequestBody PrescriptionRequest request){
         ApiResponse<PrescriptionResponse> apiResponse = ApiResponse.<PrescriptionResponse>builder()
                 .code("prescription-s-01")
                 .message("prescription created successful")

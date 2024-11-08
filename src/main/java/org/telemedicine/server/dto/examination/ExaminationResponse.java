@@ -4,6 +4,7 @@ package org.telemedicine.server.dto.examination;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.telemedicine.server.entity.Clinic;
+import org.telemedicine.server.entity.MedicalSchedule;
 import org.telemedicine.server.entity.Patients;
 import org.telemedicine.server.entity.ServiceEntity;
 
@@ -15,8 +16,10 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Builder
 public class ExaminationResponse {
-    LocalDate date;
+    String id;
+    LocalDate examinationDate;
     Clinic clinic;
     ServiceEntity serviceEntity;
     Patients patients;
+    MedicalSchedule medicalSchedule;
 }
